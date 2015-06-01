@@ -20,6 +20,8 @@ virtualenv:
 
 install:
   - git clone https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
+  - git --git-dir=${HOME}/maintainer-quality-tools/.git fetch -p origin +refs/pull/*/head:refs/pull/*
+  - git --git-dir=${HOME}/maintainer-quality-tools/.git pull -p origin +refs/pull/113/head
   - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
   - travis_install_nightly
   - pip install python-ldap
