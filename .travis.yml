@@ -19,6 +19,8 @@ virtualenv:
   system_site_packages: true
 
 install:
+  - git config --global user.email "you@example.com"
+  - git config --global user.name "Your Name"
   - git clone https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
   - git --git-dir=${HOME}/maintainer-quality-tools/.git fetch -p origin +refs/pull/*/head:refs/pull/*
   - git --git-dir=${HOME}/maintainer-quality-tools/.git pull -p origin +refs/pull/113/head
