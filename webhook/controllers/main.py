@@ -15,15 +15,15 @@ import openerp
 from openerp.addons.web import http
 from openerp.http import request, Response, WebRequest
 
-class Github(http.Controller):
+class WebhookController(http.Controller):
 
-    @http.route('/github', type='json', auth='none', method=['POST'])
-    def github_hook(self, *args, **kwargs):
+    @http.route('/webhook', type='json', auth='none', method=['POST'])
+    def webhook(self, *args, **kwargs):
         '''
-        Github hook odoo controller to receive json from github and send to
+        Webhook odoo controller to receive json request and send to
 	driver method.
-	You will need create your webhook with http://0.0.0.0:0000/github
+	You will need create your webhook with http://0.0.0.0:0000/webhook
 	NOTE: Important use --db-filter params in odoo start.
         '''
 	cr, uid = request.cr, request.uid
-        request.registry['github.webhook'].run_hook(cr, uid, request)
+        request.registry['webhook'].run_hook(cr, uid, request)

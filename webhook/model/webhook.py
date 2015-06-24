@@ -12,8 +12,8 @@
 
 from openerp import models, fields, api
 
-class GithubWebhook(models.Model):
-    _name = 'github.webhook'
+class Webhook(models.Model):
+    _name = 'webhook'
     _auto = False
 
     @api.model
