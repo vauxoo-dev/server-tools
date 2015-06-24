@@ -10,7 +10,7 @@
 #                moylop260@vauxoo.com
 ############################################################################
 
-from openerp import models, api
+from openerp import api, models
 
 
 class Webhook(models.Model):
