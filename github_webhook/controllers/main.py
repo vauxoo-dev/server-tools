@@ -20,6 +20,10 @@ class Github(http.Controller):
     @http.route('/github', type='json', auth='none', method=['POST'])
     def github_hook(self, *args, **kwargs):
         '''
-        Github hook
+        Github hook odoo controller to receive json from github and send to
+	driver method.
+	You will need create your webhook with http://0.0.0.0:0000/github
+	NOTE: Important use --db-filter params in odoo start.
         '''
-        return request.registry['github.webhook'].run_hook(request.cr, request.uid, request)
+	cr, uid = request.cr, request.uid
+        request.registry['github.webhook'].run_hook(cr, uid, request)
