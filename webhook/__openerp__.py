@@ -10,17 +10,17 @@
 #                moylop260@vauxoo.com
 ############################################################################
 {
-    'name' : 'Webhook',
-    'version' : '1.1',
-    'author' : 'Vauxoo',
-    'category' : 'Server Tools',
+    'name': 'Webhook',
+    'version': '1.1',
+    'author': 'Vauxoo',
+    'category': 'Server Tools',
     'website': 'https://www.vauxoo.com',
-    'depends' : [
+    'depends': [
         'web',
     ],
     'data': [
     ],
-    'qweb' : [
+    'qweb': [
     ],
     'demo': [
     ],

@@ -10,22 +10,20 @@
 #                moylop260@vauxoo.com
 ############################################################################
 
-from openerp import models, fields, api
+from openerp import models, api
+
 
 class Webhook(models.Model):
     _name = 'webhook'
     _auto = False
 
     @api.model
-    def run_hook(self, request):
-	"""
-	Method to redirect json request to method to process.
-	"""
+    def run_webhook(self, request):
+        """
+        Method to redirect json request to method to process.
+        """
         from pprint import pprint
         pprint(request.jsonrequest)
-        #print type(request.httprequest.headers)
-        #print dir(request.httprequest.headers)
-        #authorization, repo_id = self.auth_token(self.cr, self.uid, [1], self.request)
-        #print authorization, repo_id
-        #pprint('Here is the json, ')
+        # print type(request.httprequest.headers)
+        # print dir(request.httprequest.headers)
         return True

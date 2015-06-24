@@ -10,10 +10,9 @@
 #                moylop260@vauxoo.com
 ############################################################################
 
-import logging
-import openerp
 from openerp.addons.web import http
-from openerp.http import request, Response, WebRequest
+from openerp.http import request
+
 
 class WebhookController(http.Controller):
 
@@ -21,9 +20,9 @@ class WebhookController(http.Controller):
     def webhook(self, *args, **kwargs):
         '''
         Webhook odoo controller to receive json request and send to
-	driver method.
-	You will need create your webhook with http://0.0.0.0:0000/webhook
-	NOTE: Important use --db-filter params in odoo start.
+        driver method.
+        You will need create your webhook with http://0.0.0.0:0000/webhook
+        NOTE: Important use --db-filter params in odoo start.
         '''
-	cr, uid = request.cr, request.uid
-        request.registry['webhook'].run_hook(cr, uid, request)
+        cr, uid = request.cr, request.uid
+        request.registry['webhook'].run_webhook(cr, uid, request)
