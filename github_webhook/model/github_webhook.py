@@ -10,7 +10,7 @@
 #                moylop260@vauxoo.com
 ############################################################################
 
-from openerp import models, fields
+from openerp import models, fields, api
 
 class GithubWebhook(models.Model):
     _name = 'github.webhook'
