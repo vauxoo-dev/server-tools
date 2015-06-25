@@ -70,7 +70,7 @@ class Webhook(models.TransientModel):
         """
         Method to redirect json request to method to process.
         """
-        self.run_webhook(request)
+        self.set_webhook_env(request)
         if self.env.webhook_driver_name is None \
                 or self.env.method_event_name is None \
                 or not hasattr(self, self.env.method_event_name):
