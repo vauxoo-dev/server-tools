@@ -10,4 +10,4 @@
 #                moylop260@vauxoo.com
 ############################################################################
 
-from . import webhook_github
+from . import webhook
