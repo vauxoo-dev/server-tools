@@ -31,5 +31,5 @@ class WebhookController(http.Controller):
             cr, SUPERUSER_ID, {}, context=context)
         webhook = webhook_registry.browse(
             cr, SUPERUSER_ID, [webhook_id], context=context)[0]
-        webhook.set_request(request)
+        webhook.set_webhook_env(request)
         webhook.run_webhook()

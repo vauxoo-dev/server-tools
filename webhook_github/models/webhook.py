@@ -16,15 +16,20 @@ from openerp import api, models
 class Webhook(models.Model):
     _inherit = 'webhook'
 
-    @api.model
-    def get_driver_remote_address(self):
-        driver_remote_address = super(
-            Webhook, self).get_driver_remote_address()
-        driver_remote_address['run_webhook_github'] = ['192.30.252.0/22']
-        return driver_remote_address
+    @api.one
+    def set_driver_remote_address(self):
+        super(Webhook, self).set_driver_remote_address()
+        self.env.webhook_driver_address.update({
+            'github': ['192.30.252.0/22']
+        })
 
     @api.one
-    def run_webhook_github(self):
-        from pprint import pprint
-        pprint(self.env.request.jsonrequest)
+    def set_event(self):
+        super(Webhook, self).set_event()
+        if not self.env.webhook_event and self.env.webhook_driver_name == 'github':
+            self.env.webhook_event = self.env.request.httprequest.headers.get('X-Github-Event') 
+
+    @api.one
+    def run_webhook_github_push(self):
+        print "I'm here: run_webhook_github_push"
         return True
