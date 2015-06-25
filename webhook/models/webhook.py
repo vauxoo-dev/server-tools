@@ -28,10 +28,9 @@ class Webhook(models.TransientModel):
 
     @api.one
     def set_driver_name(self):
-        # import pdb;pdb.set_trace()
         self.set_driver_remote_address()
-        self.env.webhook_driver_name = self.get_driver_name()[0]  # TODO: Why needed [0]
-        print "self.env.webhook_driver_name", self.env.webhook_driver_name
+        # TODO: Why needed [0]
+        self.env.webhook_driver_name = self.get_driver_name()[0]
     
     @api.one
     def set_remote_address(self):
@@ -67,18 +66,15 @@ class Webhook(models.TransientModel):
         return None
 
     @api.one
-    def run_webhook(self):
+    def run_webhook(self, request):
         """
         Method to redirect json request to method to process.
         """
-        print "self.env.webhook_driver_name", self.env.webhook_driver_name
-        print "self.env.method_event_name", self.env.method_event_name
-        #import pdb;pdb.set_trace()
+        self.run_webhook(request)
         if self.env.webhook_driver_name is None \
                 or self.env.method_event_name is None \
                 or not hasattr(self, self.env.method_event_name):
             # TODO: Add exception odoo
             return None
-        # TODO: validate is don't exists attr
         webhook_method = getattr(self, self.env.method_event_name)
         return webhook_method()
