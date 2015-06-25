@@ -15,15 +15,14 @@ from openerp import api, models
 
 class Webhook(models.Model):
     _inherit = 'webhook'
-    
+
     @api.model
     def get_driver_remote_address(self):
-        driver_remote_address = super(Webhook, self).get_driver_remote_address()
+        driver_remote_address = super(
+            Webhook, self).get_driver_remote_address()
         driver_remote_address['run_webhook_github'] = ['192.30.252.0/22']
         return driver_remote_address
 
     @api.one
     def run_webhook_github(self):
-        print "*" * 100
         return True
-
