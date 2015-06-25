@@ -12,6 +12,7 @@
 
 from openerp.addons.web import http
 from openerp.http import request
+from openerp import SUPERUSER_ID
 
 
 class WebhookController(http.Controller):
@@ -24,5 +25,9 @@ class WebhookController(http.Controller):
         You will need create your webhook with http://0.0.0.0:0000/webhook
         NOTE: Important use --db-filter params in odoo start.
         '''
-        cr, uid = request.cr, request.uid
-        request.registry['webhook'].run_webhook(cr, uid, request)
+        cr, uid, context = request.cr, request.uid, request.context
+        webhook_registry = request.registry['webhook']
+        webhook_id = webhook_registry.create(cr, SUPERUSER_ID, {}, context=context)
+        webhook = webhook_registry.browse(cr, SUPERUSER_ID, [webhook_id], context=context)[0]
+        webhook.set_request(request)
+        webhook.run_webhook()
