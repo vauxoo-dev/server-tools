@@ -25,4 +25,6 @@ class Webhook(models.Model):
 
     @api.one
     def run_webhook_github(self):
+        from pprint import pprint
+        pprint(self.env.request.jsonrequest)
         return True

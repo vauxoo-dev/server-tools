@@ -25,11 +25,12 @@ class Webhook(models.TransientModel):
     @api.model
     def get_request_remote_addr(self):
         remote_addr = None
-        remote_addr = self.request.httprequest.remote_addr
+        remote_addr = self.env.request.httprequest.remote_addr
         return remote_addr
 
+    @api.one
     def set_request(self, request):
-        self.request = request
+        self.env.request = request
 
     @api.model
     def get_driver_method(self):
