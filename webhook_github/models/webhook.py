@@ -11,6 +11,7 @@
 ############################################################################
 
 from pprint import pprint
+import sys
 
 from openerp import api, models
 
@@ -28,34 +29,43 @@ class Webhook(models.Model):
     @api.one
     def set_event(self):
         super(Webhook, self).set_event()
-        if not self.env.webhook_event and self.env.webhook_driver_name == 'github':
-            self.env.webhook_event = self.env.request.httprequest.headers.get('X-Github-Event') 
+        if not self.env.webhook_event and \
+                self.env.webhook_driver_name == 'github':
+            self.env.webhook_event = \
+                self.env.request.httprequest.headers.get(
+                    'X-Github-Event')
 
     @api.one
     def run_webhook_github_status(self):
-        print "I'm here: run_webhook_github_status"
+        sys.stdout.write("I'm here: run_webhook_github_status\n")
         # pprint(self.env.request.jsonrequest)
         return True
 
     @api.one
     def run_webhook_github_pull_request(self):
-        print "I'm here: run_webhook_github_pull_request"
+        sys.stdout.write("I'm here: run_webhook_github_pull_request\n")
         # pprint(self.env.request.jsonrequest)
-        print "PR change in: %s/%s/pull/%s" % (
+        sys.stdout.write("PR change in: %s/%s/pull/%s\n" % (
             self.env.request.jsonrequest['repository']['owner']['login'],
             self.env.request.jsonrequest['repository']['name'],
             self.env.request.jsonrequest['pull_request']['number']
-        )
+        ))
         return True
 
     @api.one
     def run_webhook_github_push(self):
-        print "I'm here: run_webhook_github_push"
+        sys.stdout.write("I'm here: run_webhook_github_push\n")
         pprint(self.env.request.jsonrequest)
-        print "Push change in: %s/%s" % (
+        sys.stdout.write("Push change in: %s/%s\n" % (
             self.env.request.jsonrequest['repository']['owner']['name'],
             self.env.request.jsonrequest['repository']['name']
-        )
-        print "self.env.request.jsonrequest['ref']", self.env.request.jsonrequest['ref']
-        print "self.env.request.jsonrequest['base_ref']", self.env.request.jsonrequest['base_ref']
+        ))
+        sys.stdout.write(
+            "self.env.request.jsonrequest['ref']")
+        sys.stdout.write(
+            self.env.request.jsonrequest['ref'] + "\n")
+        sys.stdout.write(
+            "self.env.request.jsonrequest['base_ref']")
+        sys.stdout.write(
+            self.env.request.jsonrequest['base_ref'] + "\n")
         return True

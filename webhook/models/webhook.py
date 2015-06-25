@@ -15,6 +15,7 @@ import ipaddress
 from openerp import api, exceptions, models
 from openerp.tools.translate import _
 
+
 class Webhook(models.TransientModel):
     _name = 'webhook'
 
@@ -31,10 +32,11 @@ class Webhook(models.TransientModel):
         self.set_driver_remote_address()
         # TODO: Why needed [0]
         self.env.webhook_driver_name = self.get_driver_name()[0]
-    
+
     @api.one
     def set_remote_address(self):
-        self.env.webhook_remote_address = self.env.request.httprequest.remote_addr
+        self.env.webhook_remote_address = \
+            self.env.request.httprequest.remote_addr
 
     @api.one
     def set_method_event_name(self):
@@ -73,10 +75,13 @@ class Webhook(models.TransientModel):
         """
         self.set_webhook_env(request)
         if self.env.webhook_driver_name is None:
-            raise exceptions.ValidationError(_('webhook driver name not found'))
+            raise exceptions.ValidationError(_(
+                'webhook driver name not found'))
         if self.env.method_event_name is None:
-            raise exceptions.ValidationError(_('method event name not found'))
+            raise exceptions.ValidationError(_(
+                'method event name not found'))
         if not hasattr(self, self.env.method_event_name):
-            raise exceptions.ValidationError(_('att "%s" not found'%self.env.method_event_name))
+            raise exceptions.ValidationError(_(
+                'att "%s" not found' % self.env.method_event_name))
         webhook_method = getattr(self, self.env.method_event_name)
         return webhook_method()
