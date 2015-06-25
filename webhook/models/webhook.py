@@ -12,8 +12,8 @@
 
 import ipaddress
 
-from openerp import api, models
-
+from openerp import api, exceptions, models
+from openerp.tools.translate import _
 
 class Webhook(models.TransientModel):
     _name = 'webhook'
@@ -56,7 +56,8 @@ class Webhook(models.TransientModel):
     def get_driver_name(self):
         for driver_name, address_list in \
                 self.env.webhook_driver_address.iteritems():
-            # TODO: Validate list or string
+            if isinstance(address_list, basestring):
+                address_list = [address_list]
             for address in address_list:
                 ipn = ipaddress.ip_network(u'' + address)
                 hosts = [host.exploded for host in ipn.hosts()]
@@ -71,10 +72,11 @@ class Webhook(models.TransientModel):
         Method to redirect json request to method to process.
         """
         self.set_webhook_env(request)
-        if self.env.webhook_driver_name is None \
-                or self.env.method_event_name is None \
-                or not hasattr(self, self.env.method_event_name):
-            # TODO: Add exception odoo
-            return None
+        if self.env.webhook_driver_name is None:
+            raise exceptions.ValidationError(_('webhook driver name not found'))
+        if self.env.method_event_name is None:
+            raise exceptions.ValidationError(_('method event name not found'))
+        if not hasattr(self, self.env.method_event_name):
+            raise exceptions.ValidationError(_('att "%s" not found'%self.env.method_event_name))
         webhook_method = getattr(self, self.env.method_event_name)
         return webhook_method()
