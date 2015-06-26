@@ -40,7 +40,7 @@ def run_webhook_github_push(self):
     ))
 ```
 
-You can access to full request webhook data in variable self.env.request
+You can access to full request webhook data in variable `self.env.request`
 
 Complete example with github:
 ```python
