@@ -19,7 +19,7 @@
         'web',
     ],
     'external_dependencies': {
-        'python' : ['ipaddress'],
+        'python': ['ipaddress'],
     },
     'data': [
     ],
