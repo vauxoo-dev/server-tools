@@ -10,13 +10,13 @@
 #                moylop260@vauxoo.com
 ############################################################################
 
-import ipaddress
 import logging
 import traceback
 
+import ipaddress
+
 from openerp import api, exceptions, fields, models, tools
 from openerp.tools.translate import _
-
 
 _logger = logging.getLogger(__name__)
 
@@ -38,37 +38,39 @@ class WebhookAddress(models.Model):
 class Webhook(models.Model):
     _name = 'webhook'
 
-    name = fields.Char('Consumer name',
+    name = fields.Char(
+        'Consumer name',
         required=True,
-        help='Name of your consumer webhook.'
-        'This name will be used in named of event methods')
+        help='Name of your consumer webhook. '
+             'This name will be used in named of event methods')
     address_ids = fields.One2many(
         'webhook.address', 'webhook_id', 'IP or Network Address',
         required=True,
         help='This address will be filter to know who is '
-        'consumer webhook')
+             'consumer webhook')
     python_code_get_event = fields.Text(
         'Get event',
         required=True,
         help='Python code to get event from request data.\n'
-        'You have object.env.request variable with full '
-        'webhook request.',
+             'You have object.env.request variable with full '
+             'webhook request.',
         default='# You can use object.env.request variable '
-        'to get full data of webhook request.\n'
-        '# Example:\n#request.httprequest.'
-        'headers.get("X-Github-Event")',
+                'to get full data of webhook request.\n'
+                '# Example:\n#request.httprequest.'
+                'headers.get("X-Github-Event")',
     )
     python_code_get_ip = fields.Text(
         'Get IP',
         required=True,
         help='Python code to get remote IP address '
-        'from request data.\n'
-        'You have object.env.request variable with full '
-        'webhook request.',
+             'from request data.\n'
+             'You have object.env.request variable with full '
+             'webhook request.',
         default='# You can use object.env.request variable '
-        'to get full data of webhook request.\n'
-        '# Example:\n#object.env.request.httprequest.remote_addr'
-        '\nrequest.httprequest.remote_addr',
+                'to get full data of webhook request.\n'
+                '# Example:\n'
+                '#object.env.request.httprequest.remote_addr'
+                '\nrequest.httprequest.remote_addr',
 
     )
     active = fields.Boolean(default=True)
@@ -78,25 +80,26 @@ class Webhook(models.Model):
         """
         Execute a python code with eval.
         :param string python_code: Python code to process
-        :param object request: Request object with data of json 
+        :param object request: Request object with data of json
                                and http request
         :return: Result of process python code.
         """
         res = None
         eval_dict = {
-           'user': self.env.user,
-           'object': self,
-           'request': request,
-           # copy context to prevent side-effects of eval
-           'context': dict(self.env.context),
+            'user': self.env.user,
+            'object': self,
+            'request': request,
+            # copy context to prevent side-effects of eval
+            'context': dict(self.env.context),
         }
         try:
+            # pylint: disable=W0123
             res = eval(
                 python_code,
                 eval_dict,
             )
         except BaseException:
-            error = tools.ustr( traceback.format_exc() )
+            error = tools.ustr(traceback.format_exc())
             _logger.debug(
                 'python_code "%s" with dict [%s] error [%s]',
                 python_code, eval_dict, error)
@@ -112,7 +115,7 @@ class Webhook(models.Model):
         and range of address.
         :param object request: Request object with data of json
                                and http request
-        :return: object of webhook found or 
+        :return: object of webhook found or
                  if not found then return False
         """
         for webhook in self.search([('active', '=', True)]):
@@ -145,7 +148,7 @@ class Webhook(models.Model):
     def get_event_methods(self, event_method_base):
         """
         List all methods of current object that start with base name.
-        e.g. if exists methods called 'x1', 'x2' 
+        e.g. if exists methods called 'x1', 'x2'
         and other ones called 'y1', 'y2'
         if you have event_method_base='x'
         Then will return ['x1', 'x2']
@@ -156,7 +159,7 @@ class Webhook(models.Model):
         return sorted(
             attr for attr in dir(self) if attr.startswith(
                 event_method_base)
-            )
+        )
 
     @api.model
     def get_ping_events(self):
@@ -200,5 +203,6 @@ class Webhook(models.Model):
             method = getattr(self, method_event_name)
             res_method = method()[0]
             if res_method is NotImplemented:
-                _logger.debug('Not implemented method "%s" yet', method_event_name)
+                _logger.debug(
+                    'Not implemented method "%s" yet', method_event_name)
         return True

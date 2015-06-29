@@ -34,5 +34,6 @@ class WebhookController(http.Controller):
             cr, SUPERUSER_ID, request, context=context)
         if not webhook:
             raise exceptions.ValidationError(_(
-                'webhook consumer not found %s' % (pprint.pformat(request.jsonrequest)[:450])))
+                'webhook consumer not found %s' % (
+                    pprint.pformat(request.jsonrequest)[:450])))
         webhook.run_webhook(request)
