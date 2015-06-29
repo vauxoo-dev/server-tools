@@ -60,3 +60,10 @@ Full example of create a new webhook configuration data.
     </data>
 </openerp>
 ```
+
+External Dependecies
+---------------
+Install python package ipaddress
+You can use pip to install
+`pip install ipaddress`
+
