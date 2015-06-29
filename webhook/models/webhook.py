@@ -12,7 +12,7 @@
 
 import ipaddress
 
-from openerp import api, exceptions, fields, models
+from openerp import api, exceptions, fields, models, tools
 from openerp.tools.translate import _
 
 
@@ -46,135 +46,93 @@ class Webhook(models.Model):
         'Get event',
         required=True,
         help='Python code to get event from request data.\n'
-        'You have self.env.request variable with full '
+        'You have object.env.request variable with full '
         'webhook request.',
-        default='# You can use self.env.request variable '
+        default='# You can use object.env.request variable '
         'to get full data of webhook request.\n'
-        '# Example:\n#self.env.request.httprequest.'
-        'headers.get("X-Github-Event")'
+        '# Example:\n#object.env.request.httprequest.'
+        'headers.get("X-Github-Event")',
+    )
+    python_code_get_ip = fields.Text(
+        'Get IP',
+        required=True,
+        help='Python code to get remote IP address '
+        'from request data.\n'
+        'You have object.env.request variable with full '
+        'webhook request.',
+        default='# You can use object.env.request variable '
+        'to get full data of webhook request.\n'
+        '# Example:\n#object.env.request.httprequest.remote_addr'
+        '\nobject.env.request.httprequest.remote_addr',
+
     )
     active = fields.Boolean(default=True)
 
     @api.one
-    def set_event(self):
+    def process_python_code(self, python_code, request=None):
+        res = None
+        try:
+            res = eval(
+                python_code,
+                {'user': self.env.user,
+                 'object': self,
+                 'request': request,
+                 # copy context to prevent side-effects of eval
+                 'context': dict(self.env.context),
+            })
+        except:
+            # TODO: add debug log
+            print "eval error", python_code
+        if isinstance(res, basestring):
+            res = tools.ustr(res)
+        return res
+
+    @api.model
+    def search_with_request(self, request):
         """
-        Method to set `self.env.webhook_event` variable
-        with name of event of webhook.
+        Method to search of all webhook
+        and return only one that match with remote address
+        and range of address.
         """
-        # Not implement yet
-        self.env.webhook_event = None
+        for webhook in self.search([('active', '=', True)]):
+            remote_address = webhook.process_python_code(
+                webhook.python_code_get_ip, request)[0]
+            if not remote_address:
+                continue
+            import pdb;pdb.set_trace()
+            if webhook.is_address_range(remote_address)[0]:
+                return webhook
+        return False
 
     @api.one
-    def set_driver_remote_address(self):
-        """
-        Method to set `self.env.webhook_driver_address`
-        variable with
-        self.env.webhook_driver_address['your_webhook_provider']
-            = ['ip1', 'ip2']
-        or
-        self.env.webhook_driver_address['your_webhook_provider']
-            = ['ip1/subnet1', 'ip1/subnet2']
-        or both cases (ip/subnet or just ip) in same list.
-
-        The name of webhook provider key will use to process events methods
-        with next structure: def run_webhook_WEBHOOK-PROVIDER_EVENT(self):
-        """
-        # Not implement yet
-        self.env.webhook_driver_address = {}
-
-    @api.one
-    def set_driver_name(self):
-        """
-        Method to set global variable `self.env.webhook_driver_name`
-        executing method self.get_driver_name
-        """
-        self.set_driver_remote_address()
-        # TODO: Why needed [0]
-        self.env.webhook_driver_name = self.get_driver_name()[0]
-
-    @api.one
-    def set_remote_address(self):
-        """
-        Method to set global variable `self.env.webhook_remote_address`
-        using the variable `remote_addr` from
-        `self.env.request.httprequest` global variable.
-        """
-        self.env.webhook_remote_address = \
-            self.env.request.httprequest.remote_addr
-
-    @api.one
-    def set_method_event_name(self):
-        """
-        Method to set global variable `self.env.method_event_name`
-        with string value with structure:
-        run_webhook_PROVIDER_EVENT
-        Where PROVIDER is name of you webhook request.
-        Where EVENT is name of event in webhook request.
-        This is a method name to auto invoke it with this standard
-        """
-        self.env.method_event_name = None
-        if self.env.webhook_driver_name and self.env.webhook_event:
-            self.env.method_event_name = \
-                'run_webhook_' + self.env.webhook_driver_name + \
-                '_' + self.env.webhook_event
-
-    @api.one
-    def set_webhook_env(self, request):
-        """
-        Method to set global variables in self.env.*
-        """
-        self.env.request = request
-        self.set_remote_address()
-        self.set_driver_name()
-        self.set_event()
-        self.set_method_event_name()
-
-    @api.one
-    def get_driver_name(self):
-        """
-        Method to return `driver_name` using ip address dict
-        with key driver name and value ip address.
-        from global variable `self.env.webhook_driver_address`.
-        Search a match of ip from remote address using
-        global variable `self.env.webhook_remote_address`
-        """
-        for driver_name, address_list in \
-                self.env.webhook_driver_address.iteritems():
-            if isinstance(address_list, basestring):
-                address_list = [address_list]
-            for address in address_list:
-                ipn = ipaddress.ip_network(u'' + address)
-                hosts = [host.exploded for host in ipn.hosts()]
-                hosts.append(address)
-                if self.env.webhook_remote_address in hosts:
-                    return driver_name
+    def is_address_range(self, remote_address):
+        for address in self.address_ids:
+            ipn = ipaddress.ip_network(u'' + address.name)
+            hosts = [host.exploded for host in ipn.hosts()]
+            hosts.append(address.name)
+            if remote_address in hosts:
+                return True
+        return False
 
     @api.one
     def run_webhook(self, request):
-        """
-        Method to redirect json request to method to process.
-        Using variable global `self.env.method_event_name`
-        and execute this method if exists.
-        You need add this new methods with inherit.
-        """
-        self.set_webhook_env(request)
-        if self.env.webhook_driver_name is None:
+        event = self.process_python_code(
+            self.python_code_get_event, request)[0]
+        if not event:
             raise exceptions.ValidationError(_(
-                'webhook driver name not found'))
-        if self.env.method_event_name is None:
+                'event is not defined'))
+        method_event_name = \
+            'run_webhook_' + self.name + \
+            '_' + event
+        if not hasattr(self, method_event_name):
             raise exceptions.ValidationError(_(
-                'method event name not found'))
-        if not hasattr(self, self.env.method_event_name):
-            raise exceptions.ValidationError(_(
-                'att "%s" not found' % self.env.method_event_name))
-        webhook_method = getattr(self, self.env.method_event_name)
-        res_webhook_method = webhook_method()
-        # TODO: Why return a list and not the value returned
-        res_webhook_method2 = isinstance(res_webhook_method, list) \
-            and len(res_webhook_method) == 1 and \
-            res_webhook_method[0] or res_webhook_method
-        if res_webhook_method2 is NotImplemented:
+                'Not defined method "%s" yet' % (
+                    method_event_name)))
+        method = getattr(self, method_event_name)
+        res_method = method()[0]
+        if res_method is NotImplemented:
             raise exceptions.ValidationError(_(
                 'Not implemented method "%s" yet' % (
-                    self.env.method_event_name)))
-        return res_webhook_method
+                    method_event_name)))
+        return res_method
+
