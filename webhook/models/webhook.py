@@ -158,6 +158,16 @@ class Webhook(models.Model):
                 event_method_base)
             )
 
+    @api.model
+    def get_ping_events(self):
+        """
+        List all name of event type ping.
+        This event is a dummy event just to
+        know if a provider is working.
+        :return: List with names of ping events
+        """
+        return ['ping']
+
     @api.one
     def run_webhook(self, request):
         """
@@ -179,6 +189,10 @@ class Webhook(models.Model):
             '_' + event
         methods_event_name = self.get_event_methods(method_event_name_base)
         if not methods_event_name:
+            # if is a 'ping' event then return True
+            # because the request is received fine.
+            if event in self.get_ping_events():
+                return True
             raise exceptions.ValidationError(_(
                 'Not defined methods "%s" yet' % (
                     method_event_name_base)))
@@ -188,4 +202,3 @@ class Webhook(models.Model):
             if res_method is NotImplemented:
                 _logger.debug('Not implemented method "%s" yet', method_event_name)
         return True
-
