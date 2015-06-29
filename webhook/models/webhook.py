@@ -75,6 +75,13 @@ class Webhook(models.Model):
 
     @api.one
     def process_python_code(self, python_code, request=None):
+        """
+        Execute a python code with eval.
+        :param string python_code: Python code to process
+        :param object request: Request object with data of json 
+                               and http request
+        :return: Result of process python code.
+        """
         res = None
         eval_dict = {
            'user': self.env.user,
@@ -103,6 +110,10 @@ class Webhook(models.Model):
         Method to search of all webhook
         and return only one that match with remote address
         and range of address.
+        :param object request: Request object with data of json
+                               and http request
+        :return: object of webhook found or 
+                 if not found then return False
         """
         for webhook in self.search([('active', '=', True)]):
             remote_address = webhook.process_python_code(
@@ -115,6 +126,13 @@ class Webhook(models.Model):
 
     @api.one
     def is_address_range(self, remote_address):
+        """
+        Check if a remote IP address is in range of one
+        IP or network address of current object data.
+        :param string remote_address: Remote IP address
+        :return: if remote address match then return True
+                 else then return False
+        """
         for address in self.address_ids:
             ipn = ipaddress.ip_network(u'' + address.name)
             hosts = [host.exploded for host in ipn.hosts()]
@@ -126,9 +144,15 @@ class Webhook(models.Model):
     @api.model
     def get_event_methods(self, event_method_base):
         """
-        @event_method_base: str With name of method event base
+        List all methods of current object that start with base name.
+        e.g. if exists methods called 'x1', 'x2' 
+        and other ones called 'y1', 'y2'
+        if you have event_method_base='x'
+        Then will return ['x1', 'x2']
+        :param string event_method_base: Name of method event base
         returns: List of methods with that start wtih method base
         """
+        # TODO: Filter just callable attributes
         return sorted(
             attr for attr in dir(self) if attr.startswith(
                 event_method_base)
@@ -136,6 +160,15 @@ class Webhook(models.Model):
 
     @api.one
     def run_webhook(self, request):
+        """
+        Run methods to process a webhook event.
+        Get all methods with base name
+        'run_webhook_CONSUMER_EVENT*'
+        Invoke all methods found.
+        :param object request: Request object with data of json
+                               and http request
+        :return: True
+        """
         event = self.process_python_code(
             self.python_code_get_event, request)[0]
         if not event:
