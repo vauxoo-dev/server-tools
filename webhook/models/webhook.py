@@ -27,7 +27,7 @@ class WebhookAddress(models.Model):
         'network address e.g. of: 10.10.0.8/24',
     )
     webhook_id = fields.Many2one(
-        'webhook', 'Webhook', required=True)
+        'webhook', 'Webhook', required=True, ondelete='cascade')
 
 
 class Webhook(models.Model):
