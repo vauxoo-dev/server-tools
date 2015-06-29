@@ -202,8 +202,9 @@ class Webhook(models.Model):
         self.env.request = request
         for method_event_name in methods_event_name:
             method = getattr(self, method_event_name)
-            res_method = method()[0]
-            if res_method is NotImplemented:
-                _logger.debug(
-                    'Not implemented method "%s" yet', method_event_name)
+            res_method = method()
+            if isinstance(res_method, list) and len(res_method) == 1:
+                if res_method[0] is NotImplemented:
+                    _logger.debug(
+                        'Not implemented method "%s" yet', method_event_name)
         return True
