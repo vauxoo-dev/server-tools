@@ -11,9 +11,14 @@
 ############################################################################
 
 import ipaddress
+import logging
+import traceback
 
 from openerp import api, exceptions, fields, models, tools
 from openerp.tools.translate import _
+
+
+_logger = logging.getLogger(__name__)
 
 
 class WebhookAddress(models.Model):
@@ -50,7 +55,7 @@ class Webhook(models.Model):
         'webhook request.',
         default='# You can use object.env.request variable '
         'to get full data of webhook request.\n'
-        '# Example:\n#object.env.request.httprequest.'
+        '# Example:\n#request.httprequest.'
         'headers.get("X-Github-Event")',
     )
     python_code_get_ip = fields.Text(
@@ -63,7 +68,7 @@ class Webhook(models.Model):
         default='# You can use object.env.request variable '
         'to get full data of webhook request.\n'
         '# Example:\n#object.env.request.httprequest.remote_addr'
-        '\nobject.env.request.httprequest.remote_addr',
+        '\nrequest.httprequest.remote_addr',
 
     )
     active = fields.Boolean(default=True)
@@ -71,18 +76,23 @@ class Webhook(models.Model):
     @api.one
     def process_python_code(self, python_code, request=None):
         res = None
+        eval_dict = {
+           'user': self.env.user,
+           'object': self,
+           'request': request,
+           # copy context to prevent side-effects of eval
+           'context': dict(self.env.context),
+        }
         try:
             res = eval(
                 python_code,
-                {'user': self.env.user,
-                 'object': self,
-                 'request': request,
-                 # copy context to prevent side-effects of eval
-                 'context': dict(self.env.context),
-            })
-        except:
-            # TODO: add debug log
-            print "eval error", python_code
+                eval_dict,
+            )
+        except BaseException:
+            error = tools.ustr( traceback.format_exc() )
+            _logger.debug(
+                'python_code "%s" with dict [%s] error [%s]',
+                python_code, eval_dict, error)
         if isinstance(res, basestring):
             res = tools.ustr(res)
         return res
@@ -99,7 +109,6 @@ class Webhook(models.Model):
                 webhook.python_code_get_ip, request)[0]
             if not remote_address:
                 continue
-            import pdb;pdb.set_trace()
             if webhook.is_address_range(remote_address)[0]:
                 return webhook
         return False
@@ -114,6 +123,17 @@ class Webhook(models.Model):
                 return True
         return False
 
+    @api.model
+    def get_event_methods(self, event_method_base):
+        """
+        @event_method_base: str With name of method event base
+        returns: List of methods with that start wtih method base
+        """
+        return sorted(
+            attr for attr in dir(self) if attr.startswith(
+                event_method_base)
+            )
+
     @api.one
     def run_webhook(self, request):
         event = self.process_python_code(
@@ -121,18 +141,18 @@ class Webhook(models.Model):
         if not event:
             raise exceptions.ValidationError(_(
                 'event is not defined'))
-        method_event_name = \
+        method_event_name_base = \
             'run_webhook_' + self.name + \
             '_' + event
-        if not hasattr(self, method_event_name):
+        methods_event_name = self.get_event_methods(method_event_name_base)
+        if not methods_event_name:
             raise exceptions.ValidationError(_(
-                'Not defined method "%s" yet' % (
-                    method_event_name)))
-        method = getattr(self, method_event_name)
-        res_method = method()[0]
-        if res_method is NotImplemented:
-            raise exceptions.ValidationError(_(
-                'Not implemented method "%s" yet' % (
-                    method_event_name)))
-        return res_method
+                'Not defined methods "%s" yet' % (
+                    method_event_name_base)))
+        for method_event_name in methods_event_name:
+            method = getattr(self, method_event_name)
+            res_method = method()[0]
+            if res_method is NotImplemented:
+                _logger.debug('Not implemented method "%s" yet', method_event_name)
+        return True
 
