@@ -4,10 +4,19 @@ Webhook
 Module to receive [global webhooks](https://es.wikipedia.org/wiki/Webhook) events.
 This module invoke methods to process webhook events.
 You will need create a new module to add your logic to process the events with methods called:
-`def run_webhook_CONSUMER_EVENT_*`
+`def run_CONSUMER_EVENT*`
+Example with gihub consumer and push event.
+```python
+@api.one
+def run_github_push_task(self):
+    # You will have all request data in 
+    # variable: self.env.request
+    pass
+```
+
 Where CONSUMER is the name of you webhook consumer. e.g. github (Extract from field `name` of `webhook` model)
 Where EVENT is the name of the event from webhook `request` data.
-Where `_*` is your particular method to process this event.
+Where `*` is your particular method to process this event.
 
 To configure a new webhook you need add all ip or subnet address (with `ip/integer`) owned by your webhook consumer in webhook.address model as data.
 

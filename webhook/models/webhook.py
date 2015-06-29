@@ -176,7 +176,7 @@ class Webhook(models.Model):
         """
         Run methods to process a webhook event.
         Get all methods with base name
-        'run_webhook_CONSUMER_EVENT*'
+        'run_CONSUMER_EVENT*'
         Invoke all methods found.
         :param object request: Request object with data of json
                                and http request
@@ -188,7 +188,7 @@ class Webhook(models.Model):
             raise exceptions.ValidationError(_(
                 'event is not defined'))
         method_event_name_base = \
-            'run_webhook_' + self.name + \
+            'run_' + self.name + \
             '_' + event
         methods_event_name = self.get_event_methods(method_event_name_base)
         if not methods_event_name:
