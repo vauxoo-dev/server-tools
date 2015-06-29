@@ -12,12 +12,48 @@
 
 import ipaddress
 
-from openerp import api, exceptions, models
+from openerp import api, exceptions, fields, models
 from openerp.tools.translate import _
 
 
-class Webhook(models.TransientModel):
+class WebhookAddress(models.Model):
+    _name = 'webhook.address'
+
+    name = fields.Char(
+        'IP or Network Address',
+        required=True,
+        help='IP or network address of your consumer webhook:\n'
+        'ip address e.g.: 10.10.0.8\n'
+        'network address e.g. of: 10.10.0.8/24',
+    )
+    webhook_id = fields.Many2one(
+        'webhook', 'Webhook', required=True)
+
+
+class Webhook(models.Model):
     _name = 'webhook'
+
+    name = fields.Char('Consumer name',
+        required=True,
+        help='Name of your consumer webhook.'
+        'This name will be used in named of event methods')
+    address_ids = fields.One2many(
+        'webhook.address', 'webhook_id', 'IP or Network Address',
+        required=True,
+        help='This address will be filter to know who is '
+        'consumer webhook')
+    python_code_get_event = fields.Text(
+        'Get event',
+        required=True,
+        help='Python code to get event from request data.\n'
+        'You have self.env.request variable with full '
+        'webhook request.',
+        default='# You can use self.env.request variable '
+        'to get full data of webhook request.\n'
+        '# Example:\n#self.env.request.httprequest.'
+        'headers.get("X-Github-Event")'
+    )
+    active = fields.Boolean(default=True)
 
     @api.one
     def set_event(self):

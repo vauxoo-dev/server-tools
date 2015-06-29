@@ -19,6 +19,7 @@
         'web',
     ],
     'data': [
+        'views/webhook_views.xml',
     ],
     'qweb': [
     ],
