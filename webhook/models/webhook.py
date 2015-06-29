@@ -199,6 +199,7 @@ class Webhook(models.Model):
             raise exceptions.ValidationError(_(
                 'Not defined methods "%s" yet' % (
                     method_event_name_base)))
+        self.env.request = request
         for method_event_name in methods_event_name:
             method = getattr(self, method_event_name)
             res_method = method()[0]
