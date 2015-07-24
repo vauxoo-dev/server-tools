@@ -38,9 +38,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
-        <menuitem id="main_webhook_menu" name="Webhook"/>
-        <menuitem id="webhook_menu" name="Webhook" parent="main_webhook_menu"/>
-        <menuitem id="webhook_menu_action" name="Webhook" parent="webhook_menu" action="action_webhook"/>
+        <menuitem id="webhook_menu_action" name="Webhook Provider" parent="base.next_id_6" action="action_webhook"/>
 
     </data>
 </openerp>
