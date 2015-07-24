@@ -140,7 +140,7 @@ class TestWebhookPost(HttpCase):
             'Error in webhook get foo test!.')
 
     @tools.mute_logger('openerp.http')
-    def inactive(self):#def test_50_webhook_get_foo_action_error(self):
+    def test_50_webhook_get_foo_action_error(self):
 	"""
         Test to check that 'get_foo_action' event
         from 'webhook_test' raise error!
@@ -150,7 +150,5 @@ class TestWebhookPost(HttpCase):
             'get_foo_action', self.url, {'foo': '!bar'})
         self.assertEqual(
             json_response['error']['data']['message'],
-            u'ValidateError\nWrong value received',
-            'Missing error in webhook get foo method test!.')
-
+	    u'Wrong value received')
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

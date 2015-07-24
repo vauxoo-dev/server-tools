@@ -11,7 +11,7 @@
 #This needs receive a json request with
 #next json values: {'foo': 'bar'}
 #If value is different will raise a error.
-if 'bar' != self.env.request.jsonrequest['foo']:
+if 'bar' != env.request.jsonrequest['foo']:
     raise Warning("Wrong value received")
 	    </field>
             <field name="state">code</field>
