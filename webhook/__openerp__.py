@@ -29,6 +29,7 @@
     'data': [
         'views/webhook_views.xml',
         'data/webhook_data.xml',
+	'security/ir.model.access.csv',
     ],
     'qweb': [
     ],

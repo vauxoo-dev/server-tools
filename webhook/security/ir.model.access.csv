@@ -1,0 +1,6 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_webhook_all","webhook_all","model_webhook",,1,0,0,0
+"access_webhook_group_system","webhook_group_system","model_webhook","base.group_system",1,1,1,1
+
+"access_webhook_address_all","webhook_address_all","model_webhook_address",,1,0,0,0
+"access_webhook_address_group_system","webhook_address_group_system","model_webhook_address","base.group_system",1,1,1,1
