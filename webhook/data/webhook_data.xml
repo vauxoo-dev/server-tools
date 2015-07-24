@@ -6,6 +6,9 @@
         <record model="webhook" id="webhook_github">
             <field name="name">github</field>
             <field name="python_code_get_event">request.httprequest.headers.get('X-Github-Event')</field>
+	    <field name="python_code_get_secret">request.httprequest.headers.get("X-Hub-Signature")</field>
+	    <field name="whitelist_ok" eval="True"/>
+	    <field name="secret">admin</field>
         </record>
         <record model="webhook.address" id="webhook_address_github">
             <field name="name">192.30.252.0/22</field>

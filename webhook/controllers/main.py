@@ -28,7 +28,8 @@ class WebhookController(http.Controller):
         :params string webhook_name: Name of webhook to use
         Webhook odoo controller to receive json request and send to
         driver method.
-        You will need create your webhook with http://0.0.0.0:0000/webhook
+        You will need configurate your webhook consumer url with
+	http://0.0.0.0:0000/?db=DBNAME/webhook/WEBHOOK_NAME
         NOTE: Important use --db-filter params in odoo start.
         '''
         # Deprecated by webhook_name dynamic name

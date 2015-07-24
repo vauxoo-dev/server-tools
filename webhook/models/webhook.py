@@ -44,8 +44,7 @@ class Webhook(models.Model):
         required=True,
         help='Name of your consumer webhook. '
              'This name will be used in named of event methods')
-    # NOT IMPLEMENTED YET
-    ip_validation_ok = fields.Boolean(
+    whitelist_ok = fields.Boolean(
 	help='IP security validation. If is True then '
 	     'will check that remote IP is in range of address.'
     )
@@ -54,8 +53,7 @@ class Webhook(models.Model):
         required=True,
         help='This address will be filter to know who is '
              'consumer webhook.')
-    # NOT IMPLEMENTED YET
-    secret = fields.Boolean(
+    secret = fields.Char(
 	help='String secret similar to one password to validate '
 	     'consumer webhook.'
     )
@@ -85,14 +83,33 @@ class Webhook(models.Model):
         default='# You can use "request" variable '
                 'to get full data of webhook request.\n'
                 '# Example:\n'
-                '#object.env.request.httprequest.remote_addr'
+                '#request.httprequest.remote_addr'
                 '\nrequest.httprequest.remote_addr',
 
     )
     active = fields.Boolean(default=True)
+
     #TODO: Add a o2m function to show all server actions
     #TODO: Add a function to show all methods
 
+    python_code_get_secret = fields.Text(
+	help='Python code to get secure string'
+	     'from request data.\n'
+	     'You have "request" variable with full '
+	     'webhook request.',
+	default='# You can use "request" variable '
+                'to get full data of webhook request.\n'
+                '# Example:\n'
+                '#request.httprequest.header.get("X-Hub-Signature")',
+    )
+
+    _sql_constraints = [
+	('name_unique',
+         'UNIQUE(name)',
+         _("The webhook name must be unique")),
+    ]
+
+    # TODO: Add constraint to use valid names of methods and url (snake_case by example)
     @api.one
     def process_python_code(self, python_code, request=None):
         """
@@ -179,6 +196,11 @@ class Webhook(models.Model):
 	])
 
     @api.one
+    def check_secret_ok(self, remote_secret):
+	print "self.secret, remote_secret", self.secret, remote_secret
+	return True
+
+    @api.one
     def run_webhook(self, request):
         """
         Run methods to process a webhook event.
@@ -194,6 +216,11 @@ class Webhook(models.Model):
         if not event:
             raise exceptions.ValidationError(_(
                 'event is not defined'))
+	if self.secret:
+            remote_secret = self.process_python_code(
+                self.python_code_get_secret, request)[0]
+            self.check_secret_ok(remote_secret)
+	
     	if event == self.ping_event:
             # if is a 'ping' event then return True
             # because the request is received fine.
