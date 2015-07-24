@@ -55,7 +55,7 @@ class Webhook(models.Model):
         help='This address will be filter to know who is '
              'consumer webhook.')
     # NOT IMPLEMENTED YET
-    secret_string = fields.Boolean(
+    secret = fields.Boolean(
 	help='String secret similar to one password to validate '
 	     'consumer webhook.'
     )
