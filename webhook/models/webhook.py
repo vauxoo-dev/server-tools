@@ -90,6 +90,8 @@ class Webhook(models.Model):
 
     )
     active = fields.Boolean(default=True)
+    #TODO: Add a o2m function to show all server actions
+    #TODO: Add a function to show all methods
 
     @api.one
     def process_python_code(self, python_code, request=None):
@@ -210,7 +212,5 @@ class Webhook(models.Model):
                     _logger.debug(
                         'Not implemented method "%s" yet',
 			method_event_name)
-	for serv_act in self.get_server_actions(
-	    method_event_name_base):
-	    serv_act.run()
+	self.get_server_actions(method_event_name_base).run()
         return True
