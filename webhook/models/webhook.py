@@ -44,11 +44,26 @@ class Webhook(models.Model):
         required=True,
         help='Name of your consumer webhook. '
              'This name will be used in named of event methods')
+    # NOT IMPLEMENTED YET
+    ip_validation_ok = fields.Boolean(
+	help='IP security validation. If is True then '
+	     'will check that remote IP is in range of address.'
+    )
     address_ids = fields.One2many(
         'webhook.address', 'webhook_id', 'IP or Network Address',
         required=True,
         help='This address will be filter to know who is '
-             'consumer webhook')
+             'consumer webhook.')
+    # NOT IMPLEMENTED YET
+    secret_string = fields.Boolean(
+	help='String secret similar to one password to validate '
+	     'consumer webhook.'
+    )
+    ping_event = fields.Char(
+	help='Name of event ping.\nIt is a dummy event '
+	     'just to know if a provider is working.',
+	default='ping',
+    )
     python_code_get_event = fields.Text(
         'Get event',
         required=True,
@@ -65,9 +80,9 @@ class Webhook(models.Model):
         required=True,
         help='Python code to get remote IP address '
              'from request data.\n'
-             'You have object.env.request variable with full '
+             'You have "request" variable with full '
              'webhook request.',
-        default='# You can use object.env.request variable '
+        default='# You can use "request" variable '
                 'to get full data of webhook request.\n'
                 '# Example:\n'
                 '#object.env.request.httprequest.remote_addr'
@@ -108,26 +123,6 @@ class Webhook(models.Model):
             res = tools.ustr(res)
         return res
 
-    @api.model
-    def search_with_request(self, request):
-        """
-        Method to search of all webhook
-        and return only one that match with remote address
-        and range of address.
-        :param object request: Request object with data of json
-                               and http request
-        :return: object of webhook found or
-                 if not found then return False
-        """
-        for webhook in self.search([('active', '=', True)]):
-            remote_address = webhook.process_python_code(
-                webhook.python_code_get_ip, request)[0]
-            if not remote_address:
-                continue
-            if webhook.is_address_range(remote_address)[0]:
-                return webhook
-        return False
-
     @api.one
     def is_address_range(self, remote_address):
         """
@@ -148,29 +143,38 @@ class Webhook(models.Model):
     @api.model
     def get_event_methods(self, event_method_base):
         """
-        List all methods of current object that start with base name.
+        List all methods for this webhook object
+	that start with base name.
         e.g. if exists methods called 'x1', 'x2'
         and other ones called 'y1', 'y2'
         if you have event_method_base='x'
         Then will return ['x1', 'x2']
         :param string event_method_base: Name of method event base
-        returns: List of methods with that start wtih method base
+        returns: List of methods start with method base
         """
-        # TODO: Filter just callable attributes
         return sorted(
             attr for attr in dir(self) if attr.startswith(
-                event_method_base)
+                event_method_base) and callable(getattr(self, attr))
         )
 
     @api.model
-    def get_ping_events(self):
-        """
-        List all name of event type ping.
-        This event is a dummy event just to
-        know if a provider is working.
-        :return: List with names of ping events
-        """
-        return ['ping']
+    def get_server_actions(self, event_method_base):
+	"""
+	List all code servers actions
+	for webhook model
+	that start with base name.
+	e.g. if exist servers action called 'x1', 'x2'
+	and other ones called 'y1', 'y2'
+	if you have event_method_base='x'
+	then will return ['x1', 'x2']
+	:param string event_method_base: Name of method event base
+	returns: List of server actions objects start wtih method base
+	"""
+	return self.env['ir.actions.server'].search([
+	    ('name', 'like', event_method_base + '%'),
+	    ('state', '=', 'code'),
+	    ('model_id.model', '=', 'webhook'),
+	])
 
     @api.one
     def run_webhook(self, request):
@@ -188,24 +192,25 @@ class Webhook(models.Model):
         if not event:
             raise exceptions.ValidationError(_(
                 'event is not defined'))
+    	if event == self.ping_event:
+            # if is a 'ping' event then return True
+            # because the request is received fine.
+	    return True
         method_event_name_base = \
             'run_' + self.name + \
             '_' + event
-        methods_event_name = self.get_event_methods(method_event_name_base)
-        if not methods_event_name:
-            # if is a 'ping' event then return True
-            # because the request is received fine.
-            if event in self.get_ping_events():
-                return True
-            raise exceptions.ValidationError(_(
-                'Not defined methods "%s" yet' % (
-                    method_event_name_base)))
         self.env.request = request
-        for method_event_name in methods_event_name:
+        for method_event_name in self.get_event_methods(
+	    method_event_name_base):
             method = getattr(self, method_event_name)
             res_method = method()
-            if isinstance(res_method, list) and len(res_method) == 1:
+            if isinstance(res_method, list) and len(
+		res_method) == 1:
                 if res_method[0] is NotImplemented:
                     _logger.debug(
-                        'Not implemented method "%s" yet', method_event_name)
+                        'Not implemented method "%s" yet',
+			method_event_name)
+	for serv_act in self.get_server_actions(
+	    method_event_name_base):
+	    serv_act.run()
         return True

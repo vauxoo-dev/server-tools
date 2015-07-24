@@ -34,6 +34,7 @@
     ],
     'demo': [
         'demo/webhook_demo.xml',
+	'demo/action_server_demo.xml',
     ],
     'test': [
     ],

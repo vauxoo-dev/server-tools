@@ -26,7 +26,7 @@ class Webhook(models.Model):
     _inherit = 'webhook'
 
     @api.one
-    def run_wehook_test_get_foo(self):
+    def run_wehook_test_get_foo_method(self):
         """
         This method is just to test webhook.
         This needs receive a json request with
@@ -90,7 +90,7 @@ class TestWebhookPost(HttpCase):
             headers=headers, params=params)
         return response.json()
 
-    def test_webhook_ping(self):
+    def test_10_webhook_ping(self):
         """
         Test to check that 'ping' generic method work fine!
         'ping' event don't need to add it in inherit class.
@@ -101,16 +101,56 @@ class TestWebhookPost(HttpCase):
         self.assertEqual(
             has_error, False, 'Error in webhook ping test!')
 
-    def test_webhook_get_foo(self):
+    def test_20_webhook_get_foo_method(self):
         """
         Test to check that 'get_foo' event from 'webhook_test'
         work fine!
         This event is defined in inherit method of test.
         """
         json_response = self.post_webhook_event(
-            'get_foo', self.url, {'foo': 'bar'})
+            'get_foo_method', self.url, {'foo': 'bar'})
         self.assertEqual(
             json_response.get('error', False), False,
             'Error in webhook get foo test!.')
+
+    @tools.mute_logger('openerp.http')
+    def test_30_webhook_get_foo_method_error(self):
+	"""
+        Test to check that 'get_foo_method' event
+	from 'webhook_test' raise error!
+        This event is defined in inherit method of test.
+        """
+	json_response = self.post_webhook_event(
+            'get_foo_method', self.url, {'foo': '!bar'})
+        self.assertEqual(
+            json_response['error']['data']['message'],
+	    u'ValidateError\nWrong value received',
+            'Missing error in webhook get foo method test!.')
+
+    def test_40_webhook_get_foo_action(self):
+	"""
+        Test to check that 'get_foo_action' event
+	from 'webhook_test' work fine!
+        This event is defined in demo action server.
+        """
+	json_response = self.post_webhook_event(
+            'get_foo_action', self.url, {'foo': 'bar'})
+        self.assertEqual(
+            json_response.get('error', False), False,
+            'Error in webhook get foo test!.')
+
+    @tools.mute_logger('openerp.http')
+    def inactive(self):#def test_50_webhook_get_foo_action_error(self):
+	"""
+        Test to check that 'get_foo_action' event
+        from 'webhook_test' raise error!
+        This event is defined in demo action server.
+        """
+	json_response = self.post_webhook_event(
+            'get_foo_action', self.url, {'foo': '!bar'})
+        self.assertEqual(
+            json_response['error']['data']['message'],
+            u'ValidateError\nWrong value received',
+            'Missing error in webhook get foo method test!.')
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

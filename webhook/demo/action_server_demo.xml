@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<openerp>
+    <data noupdate="1">
+
+        <record id="action_server_webhook_test" model="ir.actions.server">
+            <field name="name">run_wehook_test_get_foo_action</field>
+            <field name="condition">True</field>
+            <field name="model_id" ref="webhook.model_webhook"/>
+            <field name="code">
+#This method is just to test webhook.
+#This needs receive a json request with
+#next json values: {'foo': 'bar'}
+#If value is different will raise a error.
+if 'bar' != self.env.request.jsonrequest['foo']:
+    raise Warning("Wrong value received")
+	    </field>
+            <field name="state">code</field>
+            <field name="type">ir.actions.server</field>
+        </record>
+
+    </data>
+</openerp>
