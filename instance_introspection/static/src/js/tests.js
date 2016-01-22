@@ -1,6 +1,5 @@
 (function() {
     'use strict';
-
     openerp.Tour.register({
         id: 'test_instance_introspection',
         name: 'Complete a basic order trough the Front-End',
@@ -9,16 +8,26 @@
         steps: [
             {
                 title: 'Wait for the main screen',
-                wait: 2000,
                 waitFor: 'h3:contains("Addons Paths"),#accordion.results',
+            },
+            {
+                title:     'increase defaultDelay',
+                onload: function (tour) {
+                    openerp.Tour.defaultDelay = 5000;
+                }
             },
             {
                 title:  'Load Repositories',
                 element: '.btn-reload',
             },
             {
+                title:     'decrease defaultDelay',
+                onload: function (tour) {
+                    openerp.Tour.defaultDelay = 50;
+                }
+            },
+            {
                 title:  'Load Repositories',
-                wait: 2000,
                 waitFor: '#accordion.results',
             },
         ],
