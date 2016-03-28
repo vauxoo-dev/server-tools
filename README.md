@@ -18,7 +18,7 @@ Available addons
 addon | version | summary
 --- | --- | ---
 [admin_technical_features](admin_technical_features/) | 8.0.0.1.0 | Checks the technical features box for admin user.
-[auditlog](auditlog/) | 8.0.1.2.0 | Audit Log
+[auditlog](auditlog/) | 8.0.1.3.0 | Audit Log
 [auth_admin_passkey](auth_admin_passkey/) | 8.0.2.1.1 | Authentification - Admin Passkey
 [auth_brute_force](auth_brute_force/) | 8.0.1.0.0 | Tracks Authentication Attempts and Prevents Brute-force Attacks module
 [auth_dynamic_groups](auth_dynamic_groups/) | 8.0.1.0.0 | Have membership conditions for certain groups
@@ -26,10 +26,12 @@ addon | version | summary
 [auth_signup_verify_email](auth_signup_verify_email/) | 8.0.1.0.0 | Force uninvited users to use a good email for signup
 [auth_supplier](auth_supplier/) | 8.0.1.0.0 | Auth Supplier
 [base_concurrency](base_concurrency/) | 8.0.1.0.0 | Base Concurrency
+[base_custom_info](base_custom_info/) | 8.0.1.0.0 | Add custom field in models
 [base_debug4all](base_debug4all/) | 8.0.1.0.0 | Shows full debug options for all users
 [base_export_manager](base_export_manager/) | 8.0.1.0.0 | Manages model export profiles
 [base_external_dbsource](base_external_dbsource/) | 8.0.1.3.0 | External Database Sources
 [base_module_doc_rst](base_module_doc_rst/) | 8.0.1.0.0 | Modules Technical Guides in RST and Relationship Graphs
+[base_multi_image](base_multi_image/) | 8.0.2.0.0 | Allow multiple images for database objects
 [base_optional_quick_create](base_optional_quick_create/) | 8.0.0.1.0 | Avoid 'quick create' on m2o fields, on a 'by model' basis
 [base_report_auto_create_qweb](base_report_auto_create_qweb/) | 8.0.1.0.0 | Report qweb auto generation
 [base_suspend_security](base_suspend_security/) | 8.0.1.0.0 | Suspend security checks for a call
