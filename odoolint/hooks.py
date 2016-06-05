@@ -56,6 +56,7 @@ def monkey_patch_convert_file():
         filename = len(args) >= 3 and args[2] or kwargs.get('filename')
         section = len(args) >= 7 and args[6] or kwargs.get('kind')
         with file_info(filename, section, module):
+            # import pdb;pdb.set_trace()
             return convert_file_original(*args, **kwargs)
     tools.convert.convert_file = convert_file
     # Reload to propagate patch

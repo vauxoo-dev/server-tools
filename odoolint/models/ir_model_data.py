@@ -12,6 +12,21 @@ from ..hooks import get_file_info
 
 _logger = logging.getLogger(__name__)
 
+from openerp.addons.base.ir.ir_model import ir_model_data
+
+# original = ir_model_data.xmlid_lookup
+
+# def xmlid_lookup(self, cr, uid, xmlid):
+#         imd_new = get_file_info()
+#         if xmlid == 'odoolint.res_partner_category_demo_01'and imd_new['section'] == 'data':
+#             import pdb;pdb.set_trace()
+#         # res = super(IrModelData, self).xmlid_lookup(cr, uid, xmlid)
+#         res = original(self, cr, uid, xmlid)
+#         print "res, xmlid", res, xmlid
+#         self._check_data_ref_demo(cr, uid, res[0])
+#         self._check_xml_id_unachievable(cr, uid, res[0], xmlid)
+#         return res
+# ir_model_data.xmlid_lookup = xmlid_lookup
 
 class IrModelData(models.Model):
     _inherit = "ir.model.data"
@@ -99,21 +114,34 @@ class IrModelData(models.Model):
 
     @tools.ormcache(skiparg=3)
     def xmlid_lookup(self, cr, uid, xmlid):
+        imd_new = get_file_info()
+        if xmlid == 'odoolint.res_partner_category_demo_01'and imd_new['section'] == 'data':
+            import pdb;pdb.set_trace()
         res = super(IrModelData, self).xmlid_lookup(cr, uid, xmlid)
+        print "res, xmlid", res, xmlid
         self._check_data_ref_demo(cr, uid, res[0])
         self._check_xml_id_unachievable(cr, uid, res[0], xmlid)
         return res
+
+    def clear_caches(self):
+        """Inherit to clean orm_cache super method
+        """
+        super(IrModelData, self).xmlid_lookup.clear_cache(self)
+        return super(IrModelData, self).clear_caches()
 
     def _update(self, cr, uid, model, module, values, xml_id=False, store=True,
                 noupdate=False, mode='init', res_id=False, context=None):
         """Inherit to force use of checks in case where a xml_id.record
         is overwrite from other module.
         """
-        if module and xml_id and '.' in xml_id and \
-                not xml_id.startswith(module + '.'):
-            # Just in xml_id from other modules
+        print "+"*100, "xml_id", xml_id
+        imd_new = get_file_info()
+        # if xml_id == 'res_partner_category_demo_01':# and imd_new['section'] == 'data':
+        # import pdb;pdb.set_trace()
+        if module and xml_id:
+            xmlid = module + '.' + xml_id if '.' not in xml_id else xml_id
             try:
-                self.xmlid_lookup(cr, uid, xml_id)
+                self.xmlid_lookup(cr, uid, xmlid)
             except BaseException:
                 # All exceptions are off-target here
                 pass

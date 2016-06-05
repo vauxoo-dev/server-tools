@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <openerp>
-<data noupdate="0">
+<data noupdate="1">
 
     <record id="res_partner_category_demo_01" model="res.partner.category">
-        <field name="name">Test demo 01</field>
+        <field name="name">Overwritten demo from data</field>
     </record>
 
 </data>
