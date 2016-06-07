@@ -86,7 +86,8 @@ class IrModelData(models.Model):
             return True
         module_curr = module.search([('name', '=', module_curr_str)], limit=1)
         module_curr_dep_ids = module_curr._get_module_upstream_dependencies(
-            module_curr.ids, exclude_states=['uninstallable', 'to remove'])
+            module_curr.ids, known_dep_ids=module_curr.dependencies_id.ids,
+            exclude_states=['wo_excl']) + module_curr.dependencies_id.ids
         module_curr_deps = module.browse(module_curr_dep_ids).mapped('name')
         for mod_autinst in module.search([
                 ('auto_install', '=', True),
