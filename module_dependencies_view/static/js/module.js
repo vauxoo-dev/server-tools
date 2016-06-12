@@ -1,4 +1,3 @@
-//
 var json = $('#tree').data('depends'),
     width = 700,
     height = 650,
