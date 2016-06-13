@@ -1,11 +1,9 @@
-//
 var json = $('#tree').data('depends'),
-    width = 700,
-    height = 650,
+    width = $( window ).width(),
+    height = $( window ).height() - $( '.page-header' ).height() - 2 * $( 'footer' ).height(),
     maxLabel = 150,
     duration = 500,
     radius = 10;
-
 var i = 0;
 var root;
 
@@ -15,7 +13,7 @@ var tree = d3.layout.tree()
 var diagonal = d3.svg.diagonal()
     .projection(function(d) { return [d.y, d.x]; });
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#tree").append("svg")
     .attr("width", width)
     .attr("height", height)
         .append("g")
@@ -52,7 +50,7 @@ function update(source)
     nodeEnter.append("circle")
         .attr("r", 0)
         .style("fill", function(d){
-            return d._children ? "lightsteelblue" : "white";
+            return d._children ? d.color : d.color_open;
         });
 
     nodeEnter.append("text")
@@ -72,7 +70,7 @@ function update(source)
 
     nodeUpdate.select("circle")
         .attr("r", function(d){ return computeRadius(d); })
-        .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+        .style("fill", function(d) { return d._children ? d.color : d.color_open; });
 
     nodeUpdate.select("text").style("fill-opacity", 1);
 

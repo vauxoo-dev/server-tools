@@ -8,7 +8,8 @@
             <field eval="1" name="priority"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[@class='oe_clear']" position="after">
-                    <button name="open_diagram" class="oe_link" string="Dependency Diagram View" type="object"/>
+                    <button name="open_diagram" class="oe_link" string="Dependency Diagram View" type="object"/> or
+                    <button name="open_diagram_one_level" class="oe_link" string="All Dependencies" type="object"/>
                 </xpath>
             </field>
         </record>
