@@ -6,12 +6,12 @@ svg{
     cursor: pointer;
 }
 
-.node circle{
+.node circle {
     stroke: steelblue;
     stroke-width: 1.5px;
 }
 
-.link{
+.link {
     fill: none;
     stroke: lightgray;
     stroke-width: 1.5px;
@@ -28,7 +28,6 @@ body {
   margin-bottom: 60px;
 }
 .footer {
-  position: absolute;
   bottom: 0;
   width: 100%;
   /* Set the fixed height of the footer here */
