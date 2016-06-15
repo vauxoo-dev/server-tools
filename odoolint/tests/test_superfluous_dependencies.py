@@ -29,26 +29,41 @@ class TestSuperfluousDependencies(common.TransactionCase):
         Search a module with dependencies and create a new one adding
         the dependencies and sub-dependencies
         """
-        current_module = self.imm.search([('name', '=', MODULE)], limit=1)
-        new_deps = self.imm.search([
-            ('dependencies_id', '!=', False),
-            ('dependencies_id.name', '!=', 'base'),
-        ], limit=2)
-        new_sub_dep_names = set(
-            new_deps.mapped('dependencies_id.depend_id.dependencies_id.name')
-        ) | set(new_deps.mapped('name'))
+        work_module = self.imm.search([('name', '=', 'sale')], limit=1)
+        superfluous_ids = work_module.downstream_dependencies(
+            exclude_states=['wo_exc'])
+        self.assertTrue(superfluous_ids)
+        superfluous = self.imm.browse(superfluous_ids[0])
         new_module_data = {
-            'name': MODULE + '_copy',
+            'name': work_module.name + '_superfluous',
             'dependencies_id': [
-                (0, 0, {'name': new_sub_dep_name})
-                for new_sub_dep_name in new_sub_dep_names]
-        }
-        new_module = current_module.copy(new_module_data)
+                (0, 0, {'name': work_module.name}),
+                (0, 0, {'name': superfluous.name}),
+            ]}
+        new_module = work_module.copy(new_module_data)
         return new_module
+
+        # current_module = self.imm.search([('name', '=', MODULE)], limit=1)
+        # new_depend = self.imm.search([
+        #     ('dependencies_id', '!=', False),
+        #     ('dependencies_id.name', '!=', 'base'),
+        # ], limit=1)
+        # new_sub_depend_names = set(
+        #     new_depend.mapped('dependencies_id.depend_id.dependencies_id.name')
+        # ) - set(new_depend.mapped('name'))
+        # new_module_data = {
+        #     'name': MODULE + '_copy',
+        #     'dependencies_id': [
+        #         (0, 0, {'name': new_depend.name}),
+        #         (0, 0, {'name': new_sub_depend_names.pop()})],
+        # }
+        # new_module = current_module.copy(new_module_data)
+        # return new_module
 
     def test_superfluous_dependencies(self):
         """Test superfluous dependencies
         """
         module = self.create_module_superfluous_deps()
         superfluous_depend_ids = module.compute_superfluous_dependencies()
-        self.assertTrue(superfluous_depend_ids)
+        self.assertEqual(superfluous_depend_ids,
+                         [module.dependencies_id.mapped('depend_id').ids[1]])

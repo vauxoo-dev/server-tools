@@ -70,5 +70,14 @@ class IrModuleModule(models.Model):
     @api.multi
     def compute_superfluous_dependencies(self):
         for module in self:
-            import pdb;pdb.set_trace()
-            print module.name
+            closest_depend_ids = module.dependencies_id.mapped('depend_id').ids
+            sub_depend_ids = set()
+            for closest_depend_id in closest_depend_ids:
+                sub_depend_ids |= set(
+                    self._get_module_upstream_dependencies(
+                        [closest_depend_id], exclude_states=['wo-exc'],
+                        known_dep_ids=None)
+                )
+            superfluous_depend_ids = \
+                set(closest_depend_ids) & set(sub_depend_ids)
+            return list(superfluous_depend_ids)
