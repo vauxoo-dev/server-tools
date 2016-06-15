@@ -66,3 +66,9 @@ class IrModuleModule(models.Model):
             known_dep_ids = self.get_autoinstall_satisfied(
                 known_dep_ids | set(new_autinst_satisfied.ids))
         return list(known_dep_ids)
+
+    @api.multi
+    def compute_superfluous_dependencies(self):
+        for module in self:
+            import pdb;pdb.set_trace()
+            print module.name
