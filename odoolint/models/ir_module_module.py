@@ -12,6 +12,19 @@ class ModuleDependency(models.Model):
     superfluous_comment = fields.Text(compute='compute_superfluous',
                                       store=True)
 
+    def get_superfluous_comment(self):
+        # TODO: Get the list reason from dependencies here
+        imm = self.env['ir.module.module']
+        superfluous = self.depend_id
+        downstream_dependencies = imm.browse(
+            superfluous.downstream_dependencies(exclude_states=['wo_exc']))
+        reason = set(downstream_dependencies.mapped('name')) & \
+            set(self.module_id.dependencies_id.mapped('depend_id.name'))
+        return (
+            "The module '%s' is superfluous because depends of %s too" % (
+                superfluous.mapped('name'),
+                list(reason)))
+
     @api.depends('module_id.dependencies_id')
     def compute_superfluous(self):
         """Compute if the dependency is superfluous"""
@@ -27,10 +40,12 @@ class ModuleDependency(models.Model):
                         [closest_depend_id], exclude_states=['wo-exc'],
                         known_dep_ids=None)
                 )
-            superfluous_depend_ids = \
+            superfluous_ids = \
                 set(closest_depend_ids) & set(sub_depend_ids)
-            if dependency.depend_id.id in superfluous_depend_ids:
+            if dependency.depend_id.id in superfluous_ids:
                 dependency.superfluous = True
+                dependency.superfluous_comment = \
+                    dependency.get_superfluous_comment()
 
 class IrModuleModule(models.Model):
     _inherit = "ir.module.module"
