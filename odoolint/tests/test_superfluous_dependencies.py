@@ -49,8 +49,8 @@ class TestSuperfluousDependencies(common.TransactionCase):
     def test_superfluous_dependencies(self):
         """Test superfluous dependencies"""
         module = self.create_module_superfluous_deps(self.work_module)
-        superfluous_depend_ids = module.compute_superfluous_dependencies()
-        superfluous = self.imm.browse(superfluous_depend_ids)
+        module.compute_superfluous_dependencies()
+        superfluous = module.dependencies_id.filtered('superfluous')
         self.assertEqual(superfluous.name, self.work_module)
 
     def get_superfluous_reason(self, work_module, superfluous):
@@ -64,10 +64,17 @@ class TestSuperfluousDependencies(common.TransactionCase):
         """Test no superfluous dependencies assuming that %s don't have""" % (
              self.work_module)
         work_module = self.imm.search([('name', '=', self.work_module)])
-        superfluous_ids = work_module.compute_superfluous_dependencies()
-        superfluous = self.imm.browse(superfluous_ids)
+        work_module.compute_superfluous_dependencies()
+        superfluous = work_module.dependencies_id.filtered('superfluous')
         self.assertFalse(
             superfluous.mapped('name'),
-            "The module '%s' is superfluous because depends of %s too" % (
-                superfluous.mapped('name'),
-                self.get_superfluous_reason(work_module, superfluous)))
+            superfluous.mapped('superfluous_comment'))
+
+    def test_self_superfluous(self):
+        """Show a warning of all the superfluous dependency cases"""
+        modules = self.imm.search([('state', '!=', 'uninstallable')])
+        modules.compute_superfluous_dependencies()
+        for dependency in modules.dependencies_id.filtered('superfluous'):
+            module_logger = logging.getLogger(
+                __name__ + '.' + dependency.module_id.name)
+            module_logger.info(dependency.module_id.superfluous_comment)
