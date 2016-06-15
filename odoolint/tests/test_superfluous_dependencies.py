@@ -19,17 +19,21 @@ class TestSuperfluousDependencies(common.TransactionCase):
     def setUp(self):
         super(TestSuperfluousDependencies, self).setUp()
         self.imm = self.env['ir.module.module']
+        self.superfluous_work = 'sale'
 
     def tearDown(self):
         super(TestSuperfluousDependencies, self).tearDown()
         self.imm.clear_caches()
 
-    def create_module_superfluous_deps(self):
+    def create_module_superfluous_deps(self, superfluous_work):
         """Create a module with superfluous dependencies
         Search a module with dependencies and create a new one adding
         the dependencies and sub-dependencies
+        :param superfluous_work str: Name of the module of work to create it
+            superfluous in dependencies of new one.
         """
-        work_module = self.imm.search([('name', '=', 'sale')], limit=1)
+        work_module = self.imm.search([('name', '=', superfluous_work)],
+                                      limit=1)
         superfluous_ids = work_module.downstream_dependencies(
             exclude_states=['wo_exc'])
         self.assertTrue(superfluous_ids)
@@ -43,27 +47,11 @@ class TestSuperfluousDependencies(common.TransactionCase):
         new_module = work_module.copy(new_module_data)
         return new_module
 
-        # current_module = self.imm.search([('name', '=', MODULE)], limit=1)
-        # new_depend = self.imm.search([
-        #     ('dependencies_id', '!=', False),
-        #     ('dependencies_id.name', '!=', 'base'),
-        # ], limit=1)
-        # new_sub_depend_names = set(
-        #     new_depend.mapped('dependencies_id.depend_id.dependencies_id.name')
-        # ) - set(new_depend.mapped('name'))
-        # new_module_data = {
-        #     'name': MODULE + '_copy',
-        #     'dependencies_id': [
-        #         (0, 0, {'name': new_depend.name}),
-        #         (0, 0, {'name': new_sub_depend_names.pop()})],
-        # }
-        # new_module = current_module.copy(new_module_data)
-        # return new_module
-
     def test_superfluous_dependencies(self):
         """Test superfluous dependencies
         """
-        module = self.create_module_superfluous_deps()
+        module = self.create_module_superfluous_deps(self.superfluous_work)
         superfluous_depend_ids = module.compute_superfluous_dependencies()
-        self.assertEqual(superfluous_depend_ids,
-                         [module.dependencies_id.mapped('depend_id').ids[1]])
+        self.assertEqual(len(superfluous_depend_ids), 1)
+        superfluous = self.imm.browse(superfluous_depend_ids)
+        self.assertEqual(superfluous.name, self.superfluous_work)
