@@ -34,15 +34,14 @@ class TestSuperfluousDependencies(common.TransactionCase):
             ('dependencies_id', '!=', False),
             ('dependencies_id.name', '!=', 'base'),
         ], limit=2)
-        new_sub_dep_names = list(set(new_deps.mapped(
-            'dependencies_id.depend_id.dependencies_id.name')) |
-            set(new_deps.mapped('name')))
-        depends_o2m_data = []
-        for new_sub_dep_name in new_sub_dep_names:
-            depends_o2m_data.append((0, 0, {'name': new_sub_dep_name}))
+        new_sub_dep_names = set(
+            new_deps.mapped('dependencies_id.depend_id.dependencies_id.name')
+        ) | set(new_deps.mapped('name'))
         new_module_data = {
             'name': MODULE + '_copy',
-            'dependencies_id': depends_o2m_data,
+            'dependencies_id': [
+                (0, 0, {'name': new_sub_dep_name})
+                for new_sub_dep_name in new_sub_dep_names]
         }
         new_module = current_module.copy(new_module_data)
         return new_module
