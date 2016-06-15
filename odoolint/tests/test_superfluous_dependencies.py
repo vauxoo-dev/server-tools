@@ -19,21 +19,20 @@ class TestSuperfluousDependencies(common.TransactionCase):
     def setUp(self):
         super(TestSuperfluousDependencies, self).setUp()
         self.imm = self.env['ir.module.module']
-        self.superfluous_work = 'sale'
+        self.work_module = 'document'
 
     def tearDown(self):
         super(TestSuperfluousDependencies, self).tearDown()
         self.imm.clear_caches()
 
-    def create_module_superfluous_deps(self, superfluous_work):
+    def create_module_superfluous_deps(self, work_module):
         """Create a module with superfluous dependencies
         Search a module with dependencies and create a new one adding
         the dependencies and sub-dependencies
         :param superfluous_work str: Name of the module of work to create it
             superfluous in dependencies of new one.
         """
-        work_module = self.imm.search([('name', '=', superfluous_work)],
-                                      limit=1)
+        work_module = self.imm.search([('name', '=', work_module)])
         superfluous_ids = work_module.downstream_dependencies(
             exclude_states=['wo_exc'])
         self.assertTrue(superfluous_ids)
@@ -48,10 +47,27 @@ class TestSuperfluousDependencies(common.TransactionCase):
         return new_module
 
     def test_superfluous_dependencies(self):
-        """Test superfluous dependencies
-        """
-        module = self.create_module_superfluous_deps(self.superfluous_work)
+        """Test superfluous dependencies"""
+        module = self.create_module_superfluous_deps(self.work_module)
         superfluous_depend_ids = module.compute_superfluous_dependencies()
-        self.assertEqual(len(superfluous_depend_ids), 1)
         superfluous = self.imm.browse(superfluous_depend_ids)
-        self.assertEqual(superfluous.name, self.superfluous_work)
+        self.assertEqual(superfluous.name, self.work_module)
+
+    def get_superfluous_reason(self, work_module, superfluous):
+        downstream_dependencies = self.imm.browse(
+            superfluous.downstream_dependencies(exclude_states=['wo_exc']))
+        reason = set(downstream_dependencies.mapped('name')) & \
+            set(work_module.dependencies_id.mapped('depend_id.name'))
+        return list(reason)
+
+    def test_no_superfluous_dependencies(self):
+        """Test no superfluous dependencies assuming that %s don't have""" % (
+             self.work_module)
+        work_module = self.imm.search([('name', '=', self.work_module)])
+        superfluous_ids = work_module.compute_superfluous_dependencies()
+        superfluous = self.imm.browse(superfluous_ids)
+        self.assertFalse(
+            superfluous.mapped('name'),
+            "The module '%s' is superfluous because depends of %s too" % (
+                superfluous.mapped('name'),
+                self.get_superfluous_reason(work_module, superfluous)))
