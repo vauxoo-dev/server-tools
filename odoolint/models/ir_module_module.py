@@ -2,8 +2,35 @@
 # © 2016  Vauxoo (<http://www.vauxoo.com/>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import api, models
+from openerp import api, fields, models
 
+
+class ModuleDependency(models.Model):
+    _inherit = 'ir.module.module.dependency'
+
+    superfluous = fields.Boolean(compute='compute_superfluous', store=True)
+    superfluous_comment = fields.Text(compute='compute_superfluous',
+                                      store=True)
+
+    @api.depends('module_id.dependencies_id')
+    def compute_superfluous(self):
+        """Compute if the dependency is superfluous"""
+        imm = self.env['ir.module.module']
+        for dependency in self:
+            module = dependency.module_id
+            # TODO: Add a buffer to avoid recompute the same item many times.
+            closest_depend_ids = module.dependencies_id.mapped('depend_id').ids
+            sub_depend_ids = set()
+            for closest_depend_id in closest_depend_ids:
+                sub_depend_ids |= set(
+                    imm._get_module_upstream_dependencies(
+                        [closest_depend_id], exclude_states=['wo-exc'],
+                        known_dep_ids=None)
+                )
+            superfluous_depend_ids = \
+                set(closest_depend_ids) & set(sub_depend_ids)
+            if dependency.depend_id.id in superfluous_depend_ids:
+                dependency.superfluous = True
 
 class IrModuleModule(models.Model):
     _inherit = "ir.module.module"
