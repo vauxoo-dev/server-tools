@@ -25,11 +25,31 @@ class TestSuperfluousDependencies(common.TransactionCase):
         self.imm.clear_caches()
 
     def create_module_superfluous_deps(self):
-        new_module = self.imm.search([('name', '=', MODULE)], limit=1).copy({
-            'name': MODULE + '_copy'})
-        import pdb;pdb.set_trace()
+        """Create a module with superfluous dependencies
+        Search a module with dependencies and create a new one adding
+        the dependencies and sub-dependencies
+        """
+        current_module = self.imm.search([('name', '=', MODULE)], limit=1)
+        new_deps = self.imm.search([
+            ('dependencies_id', '!=', False),
+            ('dependencies_id.name', '!=', 'base'),
+        ], limit=2)
+        new_sub_dep_names = list(set(new_deps.mapped(
+            'dependencies_id.depend_id.dependencies_id.name')) |
+            set(new_deps.mapped('name')))
+        depends_o2m_data = []
+        for new_sub_dep_name in new_sub_dep_names:
+            depends_o2m_data.append((0, 0, {'name': new_sub_dep_name}))
+        new_module_data = {
+            'name': MODULE + '_copy',
+            'dependencies_id': depends_o2m_data,
+        }
+        new_module = current_module.copy(new_module_data)
         return new_module
 
     def test_superfluous_dependencies(self):
+        """Test superfluous dependencies
+        """
         module = self.create_module_superfluous_deps()
-        module.name
+        superfluous_depend_ids = module.compute_superfluous_dependencies()
+        self.assertTrue(superfluous_depend_ids)
