@@ -2,7 +2,50 @@
 # © 2016  Vauxoo (<http://www.vauxoo.com/>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import api, models
+from openerp import api, fields, models
+
+
+class ModuleDependency(models.Model):
+    _inherit = 'ir.module.module.dependency'
+
+    superfluous = fields.Boolean(compute='compute_superfluous', store=True)
+    superfluous_comment = fields.Text(compute='compute_superfluous',
+                                      store=True)
+
+    def get_superfluous_comment(self):
+        imm = self.env['ir.module.module']
+        superfluous = self.depend_id
+        downstream_dependencies = imm.browse(
+            superfluous.downstream_dependencies(exclude_states=['wo_exc']))
+        reason = set(downstream_dependencies.mapped('name')) & \
+            set(self.module_id.dependencies_id.mapped('depend_id.name'))
+        return (
+            "The dependency '%s' is superfluous because is used "
+            "as dependency of '%s' too" % (
+                superfluous.name,
+                ','.join(list(reason))))
+
+    @api.depends('module_id.dependencies_id')
+    def compute_superfluous(self):
+        """Compute if the dependency is superfluous"""
+        imm = self.env['ir.module.module']
+        for dependency in self:
+            module = dependency.module_id
+            # TODO: Add a buffer to avoid recompute the same item many times.
+            closest_depend_ids = module.dependencies_id.mapped('depend_id').ids
+            sub_depend_ids = set()
+            for closest_depend_id in closest_depend_ids:
+                sub_depend_ids |= set(
+                    imm._get_module_upstream_dependencies(
+                        [closest_depend_id], exclude_states=['wo-exc'],
+                        known_dep_ids=None)
+                )
+            superfluous_ids = \
+                set(closest_depend_ids) & set(sub_depend_ids)
+            if dependency.depend_id.id in superfluous_ids:
+                dependency.superfluous = True
+                dependency.superfluous_comment = \
+                    dependency.get_superfluous_comment()
 
 
 class IrModuleModule(models.Model):
@@ -66,3 +109,9 @@ class IrModuleModule(models.Model):
             known_dep_ids = self.get_autoinstall_satisfied(
                 known_dep_ids | set(new_autinst_satisfied.ids))
         return list(known_dep_ids)
+
+    @api.multi
+    def compute_superfluous_dependencies(self):
+        """Call directly the method superfluous dependencies to recompute them
+        """
+        self.mapped('dependencies_id').compute_superfluous()
