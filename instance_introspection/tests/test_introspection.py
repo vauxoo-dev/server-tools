@@ -13,7 +13,7 @@ import openerp.tests
 
 
 @openerp.tests.common.at_install(False)
-@openerp.tests.common.post_install(True)
+@openerp.tests.common.post_install(False)
 class TestUi(openerp.tests.HttpCase):
     def test_01_instance_introspection(self):
         '''Just load the introspection of instance.

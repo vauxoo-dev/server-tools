@@ -69,13 +69,3 @@ class TestSuperfluousDependencies(common.TransactionCase):
         self.assertFalse(
             superfluous.mapped('name'),
             superfluous.mapped('superfluous_comment'))
-
-    def test_self_superfluous(self):
-        """Show a warning of all the superfluous dependency cases"""
-        modules = self.imm.search([('state', '!=', 'uninstallable')])
-        modules.compute_superfluous_dependencies()
-        import pdb;pdb.set_trace()
-        for dependency in modules.dependencies_id.filtered('superfluous'):
-            module_logger = logging.getLogger(
-                __name__ + '.' + dependency.module_id.name)
-            module_logger.info(dependency.module_id.superfluous_comment)
