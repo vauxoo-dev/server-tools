@@ -34,6 +34,7 @@ addon | version | summary
 [base_ir_filters_active](base_ir_filters_active/) | 8.0.1.0.0 | Allows you to disable (hide) filters
 [base_module_doc_rst](base_module_doc_rst/) | 8.0.1.0.0 | Modules Technical Guides in RST and Relationship Graphs
 [base_multi_image](base_multi_image/) | 8.0.2.0.0 | Allow multiple images for database objects
+[base_name_search_improved](base_name_search_improved/) | 8.0.1.0.0 | Friendlier search when typing in relation fields
 [base_optional_quick_create](base_optional_quick_create/) | 8.0.0.1.0 | Avoid 'quick create' on m2o fields, on a 'by model' basis
 [base_report_auto_create_qweb](base_report_auto_create_qweb/) | 8.0.1.0.0 | Report qweb auto generation
 [base_suspend_security](base_suspend_security/) | 8.0.1.0.0 | Suspend security checks for a call
@@ -64,7 +65,7 @@ addon | version | summary
 [server_environment_files_sample](server_environment_files_sample/) | 8.0.1.0.0 | Example server configuration environment files repository module
 [shell](shell/) | 8.0.1.0.0 | Backport of the v9 shell CLI command.
 [super_calendar](super_calendar/) | 8.0.0.2.0 | This module allows to create configurable calendars.
-[users_ldap_groups](users_ldap_groups/) | 8.0.1.2.0 | Adds user accounts to groups based on rules defined by the administrator.
+[users_ldap_groups](users_ldap_groups/) | 8.0.1.2.1 | Adds user accounts to groups based on rules defined by the administrator.
 [users_ldap_mail](users_ldap_mail/) | 8.0.1.0.0 | LDAP mapping for user name and e-mail
 [users_ldap_populate](users_ldap_populate/) | 8.0.1.2.0 | LDAP Populate
 [users_ldap_push](users_ldap_push/) | 8.0.1.0.0 | Creates a ldap entry when you create a user in Odoo
