@@ -10,8 +10,16 @@ Add runtime lint checks that don't are detected by odoo.
 
 They are shown from logger.warning
 
-- Demo xml_id referenced from data xml.
+- Demo xml_id referenced from data xml if the module is installed with `--without-demo=all`
 - Unachievable xml_id if the module is installed with `-i module`
+- Broken button If the module use a button action but is not defined on odoo
+- Broken local path in `link` items of views, e.g. `<link /module_a/folder` and `/module_a/folder` is not exists.
+- Duplicate items from selection fields e.g. `myfield = fields.Selection([('duplicated1', 'Duplicated1')])... myfield = fields.Selection(selection_add=[('duplicated1', 'Duplicated1')])`
+- Superfluous dependency e.g. 
+  - `sale_project: ['sale, 'project']`
+  - `my_module: ['sale', 'base', 'sale_project', 'project']`
+  `sale`, `project` and `base` are superfluous in `my_module` because `sale_project` contains them.
+
 
 Installation
 ============
