@@ -19,6 +19,9 @@ They are shown from logger.warning
   - `sale_project: ['sale, 'project']`
   - `my_module: ['sale', 'base', 'sale_project', 'project']`
   `sale`, `project` and `base` are superfluous in `my_module` because `sale_project` contains them.
+- Add check to validate non boolean values in boolean fields e.g.
+  - `<field name="active">False</field>` It's processed like as a True and you should fix it with `<field name="customer" eval="False"/>`
+  - For your information a Pull Request to change this behaviour: https://github.com/odoo/odoo/pull/13152
 
 
 Installation
