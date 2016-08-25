@@ -22,6 +22,8 @@ They are shown from logger.warning
 - Add check to validate non boolean values in boolean fields e.g.
   - `<field name="active">False</field>` It's processed like as a True and you should fix it with `<field name="customer" eval="False"/>`
   - For your information a Pull Request to change this behaviour: https://github.com/odoo/odoo/pull/13152
+- Add a log error if there is a 404 code in the message of werkzeug logger
+  - For your information a Pull Request to change this behaviour: https://github.com/odoo/odoo/pull/13289
 
 
 Installation
