@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="website_block_indexing" inherit_id="website.layout">
+            <xpath expr="//head" position="inside">
+                <meta name="robots" content="noindex"/>
+                <meta name="googlebot" content="noindex"/>
+            </xpath>
+        </template>
+    </data>
+</openerp>
