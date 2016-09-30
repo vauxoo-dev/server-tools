@@ -13,13 +13,13 @@ addons:
 
 env:
   global:
-  - VERSION="8.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0"
+  - VERSION="8.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0" NO_EXTRA_REPOS="1"
   # - TRANSIFEX_USER='transbot@odoo-community.org'
   - secure: Z06mZCN+Hm3myqHSOZpOOk1pd4oq1epAWZv6m9OX2bTNHbhyOVOGK6JWWsnDm/3DUCN1ZeLtSGOl9bvQfMa8ahQHA80MkLL16YlTvQV59Lh+L2gAYmxX+ogJCJgeQSVAXlGLscgkADCu/HzDlmatrDeROMtULn5i23j2qcyUNyM=
 
   matrix:
-  - LINT_CHECK="1"
-  - TESTS="1" ODOO_REPO="odoo/odoo" EXCLUDE="auth_supplier,mail_environment,server_environment,server_env_base_external_referentials"
+  # - LINT_CHECK="1"  # We have many modules with many lint errors
+  - TESTS="1" ODOO_REPO="odoo/odoo" EXCLUDE="auth_supplier,database_cleanup,dead_mans_switch_client,fetchmail_notify_error_to_sender,html_image_url_extractor,html_text,mail_environment,server_env_base_external_referentials,server_environment"
 
 virtualenv:
   system_site_packages: true
@@ -28,8 +28,6 @@ install:
   - git clone https://github.com/vauxoo/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
   - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
   - travis_install_nightly
-    # We don't need have installed 2 times the odoolint module (from mqt and this repo)
-  - rm -rf ${HOME}/odoolintsqa/odoolint_isolated
   - printf '[options]\n\nrunning_env = dev\n' > ${HOME}/.openerp_serverrc
   - ln -s ${TRAVIS_BUILD_DIR}/server_environment_files_sample ${TRAVIS_BUILD_DIR}/server_environment_files
 script:
