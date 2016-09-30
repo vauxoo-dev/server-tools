@@ -16,7 +16,8 @@ from openerp.tests import common
 class TestShowBrokenLink(common.TransactionCase):
     def test_show_broken_link(self):
         """Show a warning of all broken link cases"""
-        views = self.env['ir.ui.view'].search([('arch', 'ilike', '%<link %')])
+        views = self.env['ir.ui.view'].search([
+            ('arch_db', 'ilike', '%<link %')])
         for view in views:
             doc = etree.parse(StringIO(view.arch))
             for link in doc.xpath("//link"):
