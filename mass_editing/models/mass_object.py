@@ -65,7 +65,6 @@ class MassObject(models.Model):
             'context': "{'mass_editing_object' : %d}" % (self.id),
             'view_mode': 'form, tree',
             'target': 'new',
-            'auto_refresh': 1,
         }).id
         vals['ref_ir_value_id'] = self.env['ir.values'].create({
             'name': button_name,
