@@ -10,7 +10,7 @@ class MassObject(models.Model):
     _name = "mass.object"
     _description = "Mass Editing Object"
 
-    name = fields.Char('Name', required=True, index=1)
+    name = fields.Char(required=True, index=1)
     model_id = fields.Many2one('ir.model', 'Model', required=True,
                                help="Model is used for Selecting Fields. "
                                     "This is editable until Sidebar menu "
