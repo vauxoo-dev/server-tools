@@ -6,7 +6,7 @@ import re
 
 from datetime import datetime, timedelta
 
-from odoo import api, fields, models, SUPERUSER_ID, _
+from odoo import api, fields, models, _
 
 from ..exceptions import PassError
 
@@ -156,20 +156,3 @@ class ResUsers(models.Model):
                 'password_crypt': encrypted,
             })],
         })
-
-    # Dirty fix because this was failing when any theme was installed
-    # I think this should be a fix in the core.
-
-    @api.multi
-    def _is_system(self):
-        if not self:
-            return False
-        return super(ResUsers, self)._is_system()
-
-    @api.multi
-    def _is_superuser(self):
-        if not self:
-            return False
-        return super(ResUsers, self)._is_superuser()
-
-    ############ End of dirty fix ###############
