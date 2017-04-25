@@ -7,7 +7,6 @@ import operator
 from odoo import http
 from odoo.http import request
 try:
-    print "Hello."
     from odoo.addons.website.controllers.main import AuthSignupHome as SignupHome
 except ImportError:
     from odoo.addons.auth_signup.controllers.main import AuthSignupHome as SignupHome
