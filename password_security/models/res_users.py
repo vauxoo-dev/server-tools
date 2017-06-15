@@ -39,6 +39,7 @@ class ResUsers(models.Model):
     def write(self, vals):
         if vals.get('password'):
             self.check_password(vals['password'])
+            self._check_password_history(vals['password'])
             vals['password_write_date'] = fields.Datetime.now()
         return super(ResUsers, self).write(vals)
 
@@ -125,7 +126,7 @@ class ResUsers(models.Model):
         return True
 
     @api.multi
-    def _set_password(self, password):
+    def _check_password_history(self, password):
         """ It validates proposed password against existing history
         :raises: PassError on reused password
         """
@@ -138,14 +139,12 @@ class ResUsers(models.Model):
                 recent_passes = rec_id.password_history_ids[
                     0:recent_passes-1
                 ]
-            if len(recent_passes.filtered(
-                lambda r: crypt.verify(password, r.password_crypt)
-            )):
+            if recent_passes.filtered(
+                    lambda r: crypt.verify(password, r.password_crypt)):
                 raise PassError(
                     _('Cannot use the most recent %d passwords') %
                     rec_id.company_id.password_history
                 )
-        super(ResUsers, self)._set_password(password)
 
     @api.multi
     def _set_encrypted_password(self, encrypted):
