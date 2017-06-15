@@ -156,3 +156,14 @@ class ResUsers(models.Model):
                 'password_crypt': encrypted,
             })],
         })
+
+    @api.model
+    def signup(self, values, token=None):
+        try:
+            return super(ResUsers, self).signup(values, token=token)
+        except PassError as pass_err:
+            # Rollback write password and invalidate_cache because web request
+            # execute a commit after a raise
+            self.env.cr.rollback()
+            self.invalidate_cache()
+            raise pass_err
