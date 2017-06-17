@@ -1,68 +1,43 @@
-Profiler
-========
+.. image:: https://img.shields.io/badge/licence-AGPL--3-blue.svg
+   :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
+   :alt: License: AGPL-3
 
-The module ``profiler`` provides a very basic integration of
-the standard ``cProfile``.
+=============
+Odoo Profiler
+=============
 
-Basic usage
------------
+This module is an integration of cprofile for Odoo.
+Check the Profiler menu in admin menu
 
-After installation, a player is add on the header bar, with
-four items:
+Configuration
+=============
+By default profiler module adds two system parameters
+    - exclude_fnames > '/.repo_requirements,~/odoo-8.0,/usr/,>'
+    - exclude_query > 'ir_translation'.
 
-|player|
+These parameters can be configurated in order to exclude some outputs from
+profiling stats or pgbadger output.
 
-* Start profiling |start_profiling|
-* Stop profiling |stop_profiling|
-* Download stats: download stats file |dump_stats|
-* Clear stats |clear_stats|
+Credits
+=======
 
-Advantages
+Contributors
+------------
+
+* Moisés López <moylop260@vauxoo.com>
+* Hugo Adan <hugo@vauxoo.com>
+
+Maintainer
 ----------
 
-Executing Python code under the profiler is not really hard, but this
-module allows to do it in OpenERP context such that:
+.. image:: https://odoo-community.org/logo.png
+   :alt: Odoo Community Association
+   :target: https://odoo-community.org
 
-* no direct modification of main server Python code or addons is needed
-  (although it could be pretty simple depending on the need)
-* subtleties about threads are taken care of. In particular, the
-  accumulation of stats over several requests is correct.
-* Quick access UI to avoid statistics pollution
-* Use the standard cProfile format, see Python documentation and performance
-  wiki page for exploitation tips. Also do not miss `RunSnakeRun 
-  <http://www.vrplumber.com/programming/runsnakerun/>`_ GUI tool to help you to
-  interpret it easly.
+This module is maintained by the OCA.
 
-Caveats
--------
+OCA, or the Odoo Community Association, is a nonprofit organization whose
+mission is to support the collaborative development of Odoo features and
+promote its widespread use.
 
-* enabling the profile in one database actually does it for the whole
-  instance
-* multiprocessing (``--workers``) is *not* taken into account
-* currently developped and tested with OpenERP 8.0 only
-* no special care for uninstallion : currently a restart is needed to
-  finish uninstalling.
-* requests not going through web controllers are currently not taken
-  into account
-
-
-Credit
-------
-
-Remotely inspired from ZopeProfiler, although there is no online
-visualisation and there may never be one.
-
-.. |player| image:: https://bytebucket.org/anybox/odoo_profiler/raw/default/doc/static/player.png
-    :alt: Player to manage profiler
-.. |start_profiling| image:: https://bytebucket.org/anybox/odoo_profiler/raw/default/doc/static/start_profiling.png
-    :alt: Start profiling
-    :height: 35px
-.. |stop_profiling| image:: https://bytebucket.org/anybox/odoo_profiler/raw/default/doc/static/stop_profiling.png
-    :alt: Stop profiling
-    :height: 35px
-.. |dump_stats| image:: https://bytebucket.org/anybox/odoo_profiler/raw/default/doc/static/dump_stats.png
-    :alt: Download cprofile stats file
-    :height: 35px
-.. |clear_stats| image:: https://bytebucket.org/anybox/odoo_profiler/raw/default/doc/static/clear_stats.png
-    :alt: Clear and remove stats file
-    :height: 35px
+To contribute to this module, please visit https://odoo-community.org.
