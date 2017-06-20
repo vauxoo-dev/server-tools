@@ -10,7 +10,6 @@ import sys
 
 from datetime import datetime
 from cStringIO import StringIO
-from pstats_print2list import get_pstats_print2list, print_pstats_list
 
 from openerp.tools.misc import find_in_path
 from openerp import http, tools, sql_db
@@ -20,6 +19,10 @@ from openerp.http import request
 from openerp.addons.profiler.hooks import CoreProfile as core
 
 _logger = logging.getLogger(__name__)
+try:
+    from pstats_print2list import get_pstats_print2list, print_pstats_list
+except (ImportError, IOError) as err:
+    _logger.debug(err)
 POSTGRESQL_VERSION = os.environ.get('PSQL_VERSION', '9.3')
 DFTL_LOG_PATH = '/var/lib/postgresql/%s/main/pg_log/postgresql.log' % (
     POSTGRESQL_VERSION)
