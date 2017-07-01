@@ -22,5 +22,5 @@ class TestProfiler(tests.HttpCase):
     #     response = self.url_open(self.base_url + "/web/profiler/dump")
 
     def test_profiler_tour(self):
-        self.phantom_js('/', "openerp.Tour.run('profile_run', 'test')",
+        self.phantom_js('/web', "openerp.Tour.run('profile_run', 'test')",
                         'openerp.Tour.tours.profile_run', login='admin')

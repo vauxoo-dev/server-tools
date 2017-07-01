@@ -221,8 +221,11 @@ class ProfilerController(http.Controller):
         'PGOPTIONS'
 
         """
-        request.cr.rollback()
-        dsn = sql_db.dsn(request.cr.dbname)
-        sql_db._Pool.close_all(dsn[1])
-        db = sql_db.db_connect(request.cr.dbname)
-        request._cr = db.cursor()
+        # request.cr.rollback()
+        # import pdb
+        # pdb.set_trace()
+        # request.cr._cnx.reset()
+        # dsn = sql_db.dsn(request.cr.dbname)
+        # sql_db._Pool.close_all(dsn[1])
+        # db = sql_db.db_connect(request.cr.dbname)
+        # request._cr = db.cursor()

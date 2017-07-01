@@ -4,13 +4,25 @@
         id: 'profile_run',
         name: 'Profile run',
         path: '/web',
-        model: 'test',
+        mode: 'test',
         steps: [
             {
                 title: 'Enable profile',
-                element: 'form:has(class(title="Start profiling")) a.a-submit',
-                waitFor: 'console("ok")',
+                element: 'a.profiler_enable'
             },
-        ],
+            {
+                title: 'Disable profile',
+                element: 'a.profiler_disable'
+            },
+            {
+                title: 'Dump profile',
+                element: 'a.profiler_dump'
+            },
+            {
+                title: 'Clear profile',
+                element: 'a.profiler_clear'
+            },
+
+        ]
     });
 }());
