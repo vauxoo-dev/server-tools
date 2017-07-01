@@ -11,8 +11,16 @@
                 element: 'a.profiler_enable'
             },
             {
+                title: 'Check if is enabled',
+                waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_enabled'
+            },
+            {
                 title: 'Disable profile',
                 element: 'a.profiler_disable'
+            },
+            {
+                title: 'Check if is disabled',
+                waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_disabled'
             },
             {
                 title: 'Dump profile',
