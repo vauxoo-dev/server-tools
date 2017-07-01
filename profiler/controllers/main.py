@@ -225,7 +225,6 @@ class ProfilerController(http.Controller):
         if not getattr(threading.currentThread(), 'testing', False):
             # The tests need the same cursor to release savepoint
             return
-        _logger.warning("q33")
         request.cr._cnx.reset()
         dsn = sql_db.dsn(request.cr.dbname)
         sql_db._Pool.close_all(dsn[1])
