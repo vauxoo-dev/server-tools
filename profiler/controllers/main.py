@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 import tempfile
+import threading
 from cStringIO import StringIO
 from datetime import datetime
 
@@ -221,11 +222,12 @@ class ProfilerController(http.Controller):
         'PGOPTIONS'
 
         """
-        # request.cr.rollback()
-        # import pdb
-        # pdb.set_trace()
-        # request.cr._cnx.reset()
-        # dsn = sql_db.dsn(request.cr.dbname)
-        # sql_db._Pool.close_all(dsn[1])
-        # db = sql_db.db_connect(request.cr.dbname)
-        # request._cr = db.cursor()
+        if not getattr(threading.currentThread(), 'testing', False):
+            # The tests need the same cursor to release savepoint
+            return
+        _logger.warning("q33")
+        request.cr._cnx.reset()
+        dsn = sql_db.dsn(request.cr.dbname)
+        sql_db._Pool.close_all(dsn[1])
+        db = sql_db.db_connect(request.cr.dbname)
+        request._cr = db.cursor()

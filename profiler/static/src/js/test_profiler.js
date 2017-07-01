@@ -22,7 +22,6 @@
                 title: 'Clear profile',
                 element: 'a.profiler_clear'
             },
-
         ]
     });
 }());
