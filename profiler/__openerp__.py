@@ -14,7 +14,8 @@
     'data': [
         'data/profiler_excluding.xml',
         'security/group.xml',
-        'views/profiler.xml'
+        'views/profiler.xml',
+        'views/assets.xml',
     ],
     'external_dependencies': {
         'python': [
