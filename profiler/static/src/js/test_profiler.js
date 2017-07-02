@@ -7,29 +7,29 @@
         mode: 'test',
         steps: [
             {
-                title: 'Enable profile',
+                title: 'Start profiling',
                 element: 'a.profiler_enable'
             },
             {
-                title: 'Check if is enabled',
+                title: 'Check enabled',
                 waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_enabled'
             },
             {
-                title: 'Disable profile',
+                title: 'Stop profiling',
                 element: 'a.profiler_disable'
             },
             {
-                title: 'Check if is disabled',
+                title: 'Check disabled',
                 waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_disabled'
             },
             {
-                title: 'Dump profile',
+                title: 'Dump profiling',
                 element: 'a.profiler_dump'
             },
             {
-                title: 'Clear profile',
+                title: 'Clear profiling',
                 element: 'a.profiler_clear'
-            },
+            }
         ]
     });
 }());
