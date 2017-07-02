@@ -99,8 +99,6 @@ class ProfilerController(http.Controller):
         Uses a temporary file, because apparently there's no API to
         dump stats in a stream directly.
         """
-        import pdb
-        pdb.set_trace()
         exclude_fname = self.get_exclude_fname()
         with tools.osutil.tempdir() as dump_dir:
             ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
