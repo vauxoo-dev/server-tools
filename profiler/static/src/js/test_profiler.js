@@ -17,7 +17,6 @@
                 onload: function () {
                     $('a.profiler_disable').trigger('click');
                 }
-
             },
             {
                 title: 'Dump profiling',
@@ -27,11 +26,10 @@
             },
             {
                 title: 'Clear profiling',
-                onload: setTimeout(function () {
+                onload: function () {
                     $('a.profiler_clear').trigger('click');
-                }, 2000)
+                }
             },
-
         ]
     });
 }());
