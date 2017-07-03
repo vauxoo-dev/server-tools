@@ -8,28 +8,30 @@
         steps: [
             {
                 title: 'Start profiling',
-                element: 'a.profiler_enable'
-            },
-            {
-                title: 'Check enabled',
-                waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_enabled'
+                onload: function () {
+                    $('a.profiler_enable').trigger('click');
+                }
             },
             {
                 title: 'Stop profiling',
-                element: 'a.profiler_disable'
-            },
-            {
-                title: 'Check disabled',
-                waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_disabled'
+                onload: function () {
+                    $('a.profiler_disable').trigger('click');
+                }
+
             },
             {
                 title: 'Dump profiling',
-                element: 'a.profiler_dump'
+                onload: function () {
+                    $('a.profiler_dump').trigger('click');
+                }
             },
             {
                 title: 'Clear profiling',
-                element: 'a.profiler_clear'
-            }
+                onload: setTimeout(function () {
+                    $('a.profiler_clear').trigger('click');
+                }, 2000)
+            },
+
         ]
     });
 }());
