@@ -23,7 +23,7 @@ _logger = logging.getLogger(__name__)
 
 try:
     from pstats_print2list import get_pstats_print2list, print_pstats_list
-except ImportError as err:
+except ImportError as err:  # pragma: no cover
     _logger.debug(err)
 
 DFTL_LOG_PATH = '/var/lib/postgresql/%s/main/pg_log/postgresql.log'
