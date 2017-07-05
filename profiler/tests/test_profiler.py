@@ -2,7 +2,7 @@
 # License AGPL-3 or later (http://www.gnu.org/licenses/lgpl).
 # Copyright 2016 Vauxoo (https://www.vauxoo.com) <info@vauxoo.com>
 
-from odoo import tests
+from openerp import tests
 
 
 @tests.at_install(False)
