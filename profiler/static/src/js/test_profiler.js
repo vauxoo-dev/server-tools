@@ -1,52 +1,30 @@
-(function(){
-    'use_strict';
-    openerp.Tour.register({
-        id: 'profile_run',
-        name: 'Profile run',
-        path: '/web',
+odoo.define("profiler.tour.profiler", function (require) {
+    "use strict";
+
+    var tour = require("web.Tour");
+
+    tour.register({
+        id: 'profile',
+        name: "Profiler Tour",
+        path: "/",
         mode: 'test',
         steps: [
             {
-                title: 'Check if is cleared',
-                waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_clear'
+                title: "Start profiling",
+                element: "#oe_systray li a.profiler_enable",
             },
             {
-                title: 'Start profiling',
-                onload: function () {
-                    $('a.profiler_enable').trigger('click');
-                }
+                title: "Stop profiling",
+                element: "#oe_systray li a.profiler_disable",
             },
             {
-                title: 'Check if is enabled',
-                waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_enabled'
+                title: "Dump profiling",
+                element: "#oe_systray li a.profiler_dump",
             },
             {
-                title: 'Stop profiling',
-                onload: function () {
-                    $('a.profiler_disable').trigger('click');
-                }
+                title: "Clear profiling",
+                element: "#oe_systray li a.profiler_clear",
             },
-            {
-                title: 'Check if is disabled',
-                waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_disabled'
-            },
-            {
-                title: 'Dump profiling',
-                onload: function () {
-                    $('a.profiler_dump').trigger('click');
-                }
-            },
-            {
-                title: 'Clear profiling',
-                onload: function () {
-                    $('a.profiler_clear').trigger('click');
-                }
-            },
-            {
-                title: 'Check if is cleared again',
-                waitFor: 'li.oe_topbar_item.profiler_player.profiler_player_clear'
-            },
-
         ]
     });
-}());
+});
