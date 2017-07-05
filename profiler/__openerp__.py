@@ -5,7 +5,7 @@
 
 {
     'name': 'profiler',
-    'version': '8.0.1.0.0',
+    'version': '9.0.1.0.0',
     'category': 'Tools',
     'license': 'AGPL-3',
     'author': 'Anybox, Vauxoo, Odoo Community Association (OCA)',
@@ -15,7 +15,6 @@
         'data/profiler_excluding.xml',
         'security/group.xml',
         'views/profiler.xml',
-        'views/assets.xml',
     ],
     'external_dependencies': {
         'python': [
