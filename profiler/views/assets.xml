@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-<data>
+<odoo>
     <template id="assets_backend_test_profiler" name="Profiler Tests"
               inherit_id="website.assets_backend">
         <xpath expr="//script[last()]" position="after">
@@ -8,5 +7,4 @@
                     type="text/javascript"/>
         </xpath>
     </template>
-</data>
-</openerp>
+</odoo>

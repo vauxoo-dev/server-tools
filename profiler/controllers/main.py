@@ -222,7 +222,7 @@ class ProfilerController(http.Controller):
 
         """
         request.cr._cnx.reset()
-        dsn = sql_db.dsn(request.cr.dbname)
+        dsn = sql_db.connection_info_for(request.cr.dbname)
         sql_db._Pool.close_all(dsn[1])
         db = sql_db.db_connect(request.cr.dbname)
         request._cr = db.cursor()
