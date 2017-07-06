@@ -21,7 +21,7 @@
         </template>
         <template id="profiler_assets_frontend" inherit_id="website.assets_frontend" name="Profiler frontend">
             <xpath expr="." position="inside">
-                <script type="text/javascript" src="/profiler/static/src/js/tour_profiler.js" />
+                <script type="text/javascript" src="/profiler/static/src/js/test_profiler.js" />
             </xpath>
         </template>
     </data>
