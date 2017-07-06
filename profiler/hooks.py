@@ -6,9 +6,10 @@ import logging
 import os
 from contextlib import contextmanager
 from cProfile import Profile
+from psycopg2.extensions import parse_dsn
 
 import openerp
-from openerp import sql_db
+from openerp import sql_db, tools
 from openerp.http import WebRequest
 from openerp.service.server import ThreadedServer
 
@@ -57,13 +58,30 @@ def patch_odoo():
     _logger.info('Patching openerp.sql_db.db_connect')
     db_connect_origin = sql_db.db_connect
 
-    def dbconnect_f(to, *args, **kwargs):
+    def dbconnect_f(to, allow_uri=False, *args, **kwargs):
         try:
             to += " options='%s' " % (os.environ['PGOPTIONS'] or '')
+            allow_uri = True
         except KeyError:
             pass
-        return db_connect_origin(to, *args, **kwargs)
+        return db_connect_origin(to, allow_uri, *args, **kwargs)
     sql_db.db_connect = dbconnect_f
+
+    # odoo >= 9.0 requires sql_db.connection_info_for patch because
+    # https://github.com/odoo/odoo/pull/18060
+    _logger.info('Patching openerp.sql_db.connection_info_for')
+
+    def connection_info_for_f(db_or_uri):
+        if not db_or_uri.startswith(('postgresql://', 'postgres://')):
+            db_or_uri = "dbname=%s " % db_or_uri
+        connection_info = parse_dsn(db_or_uri)
+
+        for p in ('host', 'port', 'user', 'password'):
+            cfg = tools.config['db_' + p]
+            if cfg:
+                connection_info[p] = cfg
+        return connection_info.get('dbname'), connection_info
+    sql_db.connection_info_for = connection_info_for_f
 
 
 def dump_stats():
