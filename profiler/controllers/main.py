@@ -10,7 +10,7 @@ import tempfile
 from cStringIO import StringIO
 from datetime import datetime
 
-from openerp import http, sql_db, tools
+from openerp import http, sql_db, tools, modules
 from openerp.addons.web.controllers.main import content_disposition
 from openerp.http import request
 from openerp.service.db import dump_db_manifest
@@ -221,8 +221,8 @@ class ProfilerController(http.Controller):
         'PGOPTIONS'
 
         """
-        request.cr._cnx.reset()
-        dsn = sql_db.connection_info_for(request.cr.dbname)
-        sql_db._Pool.close_all(dsn[1])
+        modules.registry.RegistryManager.delete(request.cr.dbname)
+        if not request.cr.closed:
+            request.cr.close()
         db = sql_db.db_connect(request.cr.dbname)
         request._cr = db.cursor()
