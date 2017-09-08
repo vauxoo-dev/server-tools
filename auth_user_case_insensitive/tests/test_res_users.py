@@ -6,6 +6,7 @@ from odoo import api, registry
 from odoo.tests.common import TransactionCase
 
 
+# pylint: disable=E8102
 class TestResUsers(TransactionCase):
 
     def setUp(self):
