@@ -1,3 +1,4 @@
+/*ignore jslint start*/
 var json = $('#tree').data('depends'),
     width = $( window ).width(),
     height = $( window ).height() - $( '.page-header' ).height() - 2 * $( 'footer' ).height(),
@@ -152,6 +153,7 @@ function click(d)
     }
     update(d);
 }
+/*ignore jslint end*/
 
 function collapse(d){
     if (d.children){

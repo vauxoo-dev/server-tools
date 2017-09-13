@@ -1,3 +1,4 @@
+/*ignore jslint start*/
 var identifier = $('#tree').data('id'),
     width = 1900,
     height = 10000;
@@ -41,5 +42,6 @@ d3.json('/module/dendrogram/'+identifier, function(error, root) {
       .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
       .text(function(d) { return d.name; });
 });
+/*ignore jslint end*/
 
 d3.select(self.frameElement).style("height", height + "px");
