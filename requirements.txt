@@ -1,4 +1,4 @@
-python-ldap
+pyldap==2.4.28
 unidecode
 acme_tiny
 IPy
