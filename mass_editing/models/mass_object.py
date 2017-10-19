@@ -23,10 +23,6 @@ class MassObject(models.Model):
                                                 "template available on "
                                                 "records of the related "
                                                 "document model.")
-    ref_ir_value_id = fields.Many2one('ir.values', 'Sidebar button',
-                                      readonly=True,
-                                      help="Sidebar button to open "
-                                           "the sidebar action.")
     model_ids = fields.Many2many('ir.model', 'mass_model_rel',
                                  'mass_id', 'model_id', 'Model List')
 
@@ -65,15 +61,7 @@ class MassObject(models.Model):
             'context': "{'mass_editing_object' : %d}" % (self.id),
             'view_mode': 'form, tree',
             'target': 'new',
-        }).id
-        # We make sudo as any user with rights in this model should be able
-        # to create the action, not only admin
-        vals['ref_ir_value_id'] = self.env['ir.values'].sudo().create({
-            'name': button_name,
-            'model': src_obj,
-            'key2': 'client_action_multi',
-            'value': "ir.actions.act_window," +
-                     str(vals['ref_ir_act_window_id']),
+            'binding_model_id':  self.model_id.id,
         }).id
         self.write(vals)
         return True
@@ -83,7 +71,6 @@ class MassObject(models.Model):
         # We make sudo as any user with rights in this model should be able
         # to delete the action, not only admin
         self.mapped('ref_ir_act_window_id').sudo().unlink()
-        self.mapped('ref_ir_value_id').sudo().unlink()
         return True
 
     @api.multi
