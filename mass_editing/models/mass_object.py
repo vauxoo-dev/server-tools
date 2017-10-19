@@ -39,7 +39,7 @@ class MassObject(models.Model):
             model_ids = [self.model_id.id]
             active_model_obj = self.env[self.model_id.model]
             if active_model_obj._inherits:
-                keys = active_model_obj._inherits.keys()
+                keys = list(active_model_obj._inherits.keys())
                 inherits_model_ids = model_obj.search([('model', 'in', keys)])
                 model_ids.extend((inherits_model_ids and
                                   inherits_model_ids.ids or []))
