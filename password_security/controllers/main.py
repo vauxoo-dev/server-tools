@@ -7,9 +7,11 @@ import operator
 from odoo import http
 from odoo.http import request
 try:
-    from odoo.addons.website.controllers.main import AuthSignupHome as SignupHome
+    from odoo.addons.website.controllers.main import AuthSignupHome as \
+        SignupHome
 except ImportError:
-    from odoo.addons.auth_signup.controllers.main import AuthSignupHome as SignupHome
+    from odoo.addons.auth_signup.controllers.main import AuthSignupHome as \
+        SignupHome
 from odoo.addons.web.controllers.main import ensure_db, Session
 
 from ..exceptions import PassError
