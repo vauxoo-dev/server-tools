@@ -35,5 +35,5 @@ object you want to query.
         'views/users_ldap.xml',
         'views/populate_wizard.xml',
     ],
-    'installable': True,
+    'installable': False,
 }
