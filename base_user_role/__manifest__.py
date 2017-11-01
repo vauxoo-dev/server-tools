@@ -20,6 +20,6 @@
         'views/role.xml',
         'views/user.xml',
     ],
-    'installable': True,
+    'installable': False,
     'auto_install': False,
 }
