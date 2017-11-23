@@ -44,6 +44,9 @@ class MassObject(models.Model):
                 model_ids.extend((inherits_model_ids and
                                   inherits_model_ids.ids or []))
         self.model_ids = [(6, 0, model_ids)]
+        return {'domain': {
+            'field_ids': [('ttype', 'not in', ['reference', 'function']),
+                          ('model_id', 'in', self.model_ids._ids)]}}
 
     @api.multi
     def create_action(self):
