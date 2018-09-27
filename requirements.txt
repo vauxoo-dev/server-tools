@@ -3,6 +3,6 @@ unidecode
 acme_tiny
 IPy
 validate_email
-pysftp
+# pysftp  # https://git.vauxoo.com/absa/absa/merge_requests/14#note_82051
 fdb
 sqlalchemy
