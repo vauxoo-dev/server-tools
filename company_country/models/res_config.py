@@ -9,6 +9,7 @@ from odoo.exceptions import ValidationError
 
 class CountryCompanyConfigSettings(models.TransientModel):
     _name = 'country.company.config.settings'
+    _description = 'Country Company Configuration Settings'
 
     @api.model
     def load_country_company(self, country_code=None):
