@@ -138,7 +138,7 @@ class ProfilerProfile(models.Model):
 # Pre-enable logs
 logging_collector=on
 log_destination='stderr'
-log_directory='pg_log'
+log_directory='/var/log/postgresql'
 log_filename='postgresql.log'
 log_rotation_age=0
 log_checkpoints=on
