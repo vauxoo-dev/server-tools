@@ -147,6 +147,7 @@ log_line_prefix='%t [%p]: [%l-1] db=%d,user=%u '
 log_connections=on
 log_disconnections=on
 lc_messages='en_US.UTF-8'
+log_timezone='UTC'
 
 Reload configuration using the following query:
  - select pg_reload_conf()
