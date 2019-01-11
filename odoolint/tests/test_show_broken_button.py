@@ -54,7 +54,7 @@ class TestShowBrokenButton(common.TransactionCase):
                         # TODO: Consider inherit from xpath for *2many fields.
                         continue
                     xml_ids = view._get_xml_ids()
-                    xmlid = xml_ids and xml_ids.values()[0][0] or '.'
+                    xmlid = xml_ids and list(xml_ids.values())[0][0] or '.'
                     current_module, xml_id = xmlid.split('.')
                     module_logger = logging.getLogger(
                         __name__ + '.' + current_module)
