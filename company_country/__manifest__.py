@@ -3,7 +3,7 @@
 {
     "name": "Country Company",
     "summary": "Set country to main company",
-    "version": "11.0.1.0.0",
+    "version": "13.0.1.0.0",
     "category": "base",
     "website": "https://odoo-community.org/",
     "author": "Vauxoo, Odoo Community Association (OCA)",
