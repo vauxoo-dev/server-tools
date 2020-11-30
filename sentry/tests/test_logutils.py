@@ -49,7 +49,7 @@ class TestOdooCookieSanitizer(unittest.TestCase):
         http = result['request']
         self.assertEqual(
             http['cookies'],
-            'website_lang=en_us;session_id;foo=bar'.format(m=proc.MASK),
+            'website_lang=en_us;session_id;foo=bar',
         )
 
     def test_cookie_header(self):

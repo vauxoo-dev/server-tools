@@ -5,12 +5,12 @@ import logging
 import sys
 import unittest
 
-import raven
+import sentry_sdk
 
 from odoo import exceptions
 
-from .. import initialize_raven
-from ..logutils import OdooSentryHandler
+from .. import initialize_sentry
+# from ..logutils import OdooSentryHandler
 
 
 def log_handler_by_class(logger, handler_cls):
@@ -33,7 +33,7 @@ def remove_logging_handler(logger_name, handler_cls):
         logger.removeHandler(handler)
 
 
-class InMemoryClient(raven.Client):
+class InMemoryClient(sentry_sdk.Client):
     '''A :class:`raven.Client` subclass which simply stores events in a list.
 
     Extended based on the one found in raven-python to avoid additional testing

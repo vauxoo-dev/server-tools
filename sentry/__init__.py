@@ -3,80 +3,118 @@
 
 import logging
 
+import odoo.http
 from odoo.service import wsgi_server
 from odoo.tools import config as odoo_config
 
 from . import const
-from .logutils import LoggerNameFilter, OdooSentryHandler
+from .logutils import SanitizeOdooCookiesProcessor, fetch_git_sha
+from .logutils import InvalidGitRepository, get_extra_context
 
 import collections
 
 _logger = logging.getLogger(__name__)
-HAS_RAVEN = True
+HAS_SENTRY_SDK = True
 try:
-    import raven
-    from raven.middleware import Sentry
+    import sentry_sdk
+    from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
+    from sentry_sdk.integrations.threading import ThreadingIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
+    from sentry_sdk import HttpTransport
 except ImportError:
-    HAS_RAVEN = False
-    _logger.debug('Cannot import "raven". Please make sure it is installed.')
+    HAS_SENTRY_SDK = False
+    _logger.debug('Cannot import "sentry-sdk". Please make sure it is installed.')
 
+
+def before_send(event, hint):
+    cxtest = get_extra_context(odoo.http.request)
+    
+    tags_info = event.setdefault("tags", {})
+    tags_info.update(cxtest.setdefault("tags", {}))
+    
+    user_info = event.setdefault("user", {})
+    user_info.update(cxtest.setdefault("user", {}))
+
+    extra_info = event.setdefault('extra', {})
+    extra_info.update(cxtest.setdefault('extra', {}))
+
+    request_info = event.setdefault('request', {})
+    request_info.update(cxtest.setdefault('request', {}))
+
+    raven_processor = SanitizeOdooCookiesProcessor()
+    raven_processor.process(event)
+
+    return event
 
 def get_odoo_commit(odoo_dir):
-    '''Attempts to get Odoo git commit from :param:`odoo_dir`.'''
+    """Attempts to get Odoo git commit from :param:`odoo_dir`."""
     if not odoo_dir:
         return
     try:
-        return raven.fetch_git_sha(odoo_dir)
-    except raven.exceptions.InvalidGitRepository:
+        return fetch_git_sha(odoo_dir)
+    except InvalidGitRepository:
         _logger.debug(
             'Odoo directory: "%s" not a valid git repository', odoo_dir)
 
 
-def initialize_raven(config, client_cls=None):
-    '''
-    Setup an instance of :class:`raven.Client`.
-
-    :param config: Sentry configuration
-    :param client: class used to instantiate the raven client.
-    '''
+def initialize_sentry(config):
+    """  Setup an instance of :class:`sentry_sdk.Client`.
+        :param config: Sentry configuration
+        :param client: class used to instantiate the sentry_sdk client.
+    """
     enabled = config.get('sentry_enabled', False)
-    if not (HAS_RAVEN and enabled):
+    if not (HAS_SENTRY_SDK and enabled):
         return
 
     if config.get('sentry_odoo_dir') and config.get('sentry_release'):
         _logger.debug('Both sentry_odoo_dir and sentry_release defined, choosing sentry_release')
-    options = {
-        'release': config.get('sentry_release', get_odoo_commit(config.get('sentry_odoo_dir'))),
-    }
-    for option in const.get_sentry_options():
-        value = config.get('sentry_%s' % option.key, option.default)
-        if isinstance(option.converter, collections.Callable):
-            value = option.converter(value)
-        options[option.key] = value
+
+    release = config.get('sentry_release', get_odoo_commit(config.get('sentry_odoo_dir')))
 
     level = config.get('sentry_logging_level', const.DEFAULT_LOG_LEVEL)
     exclude_loggers = const.split_multiple(
         config.get('sentry_exclude_loggers', const.DEFAULT_EXCLUDE_LOGGERS)
     )
+
+    exclude_exceptions = const.split_multiple(
+        config.get('sentry_exclude_exceptions', const.DEFAULT_IGNORED_EXCEPTIONS)
+    )
+
     if level not in const.LOG_LEVEL_MAP:
         level = const.DEFAULT_LOG_LEVEL
 
-    client_cls = client_cls or raven.Client
-    client = client_cls(**options)
-    handler = OdooSentryHandler(
-        config.get('sentry_include_context', True),
-        client=client,
+    sentry_logging = LoggingIntegration(
         level=const.LOG_LEVEL_MAP[level],
+        event_level=logging.WARNING
     )
-    if exclude_loggers:
-        handler.addFilter(LoggerNameFilter(
-            exclude_loggers, name='sentry.logger.filter'))
-    raven.conf.setup_logging(handler)
-    wsgi_server.application = Sentry(
-        wsgi_server.application, client=client)
 
-    client.captureMessage('Starting Odoo Server')
+    client = sentry_sdk.init(
+        dsn= config.get('sentry_dsn'),
+        environment=config.get('sentry_environment', const.DEFAULT_ENVIRONMENT),
+        release=release,
+        integrations=[sentry_logging,
+                      ThreadingIntegration(propagate_hub=True)],
+        transport=HttpTransport,
+        before_send=before_send,
+    )
+
+    if exclude_loggers:
+        for item in exclude_loggers:
+            ignore_logger(item)
+
+    if exclude_exceptions:
+        for item in exclude_exceptions:
+            ignore_logger(item)
+
+    wsgi_server.application = SentryWsgiMiddleware(wsgi_server.application)
+
+    with sentry_sdk.push_scope() as scope:
+        scope.set_extra('debug', False)
+        sentry_sdk.capture_message('Starting Odoo Server', 'info')
+
     return client
 
 
-sentry_client = initialize_raven(odoo_config)
+def post_load():
+    _logger.info("Initializing sentry...")
+    initialize_sentry(odoo_config)
