@@ -3,11 +3,11 @@
 
 import logging
 import sys
-import unittest
 
 import raven
 
 from odoo import exceptions
+from odoo.tests import TransactionCase
 
 from .. import initialize_raven
 from ..logutils import OdooSentryHandler
@@ -58,7 +58,7 @@ class InMemoryClient(raven.Client):
         return False
 
 
-class TestClientSetup(unittest.TestCase):
+class TestClientSetup(TransactionCase):
 
     def setUp(self):
         super(TestClientSetup, self).setUp()
