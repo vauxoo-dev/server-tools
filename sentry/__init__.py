@@ -28,10 +28,10 @@ except ImportError:
 
 def before_send(event, hint):
     cxtest = get_extra_context(odoo.http.request)
-    
+
     tags_info = event.setdefault("tags", {})
     tags_info.update(cxtest.setdefault("tags", {}))
-    
+
     user_info = event.setdefault("user", {})
     user_info.update(cxtest.setdefault("user", {}))
 
@@ -57,7 +57,7 @@ def get_odoo_commit(odoo_dir):
             'Odoo directory: "%s" not a valid git repository', odoo_dir)
 
 
-def initialize_sentry(config):
+def initialize_sentry(config, client_meth=None):
     """  Setup an instance of :class:`sentry_sdk.Client`.
         :param config: Sentry configuration
         :param client: class used to instantiate the sentry_sdk client.
@@ -65,7 +65,7 @@ def initialize_sentry(config):
     enabled = config.get('sentry_enabled', False)
     if not (HAS_SENTRY_SDK and enabled):
         return
-
+    _logger.info("Initializing sentry...")
     if config.get('sentry_odoo_dir') and config.get('sentry_release'):
         _logger.debug('Both sentry_odoo_dir and sentry_release defined, choosing sentry_release')
 
@@ -88,7 +88,8 @@ def initialize_sentry(config):
         event_level=logging.WARNING
     )
 
-    client = sentry_sdk.init(
+    client_meth = client_meth or sentry_sdk.init
+    client = client_meth(
         dsn= config.get('sentry_dsn'),
         environment=config.get('sentry_environment', const.DEFAULT_ENVIRONMENT),
         release=release,
@@ -116,5 +117,4 @@ def initialize_sentry(config):
 
 
 def post_load():
-    _logger.info("Initializing sentry...")
     initialize_sentry(odoo_config)
