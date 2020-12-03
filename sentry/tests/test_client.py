@@ -4,9 +4,10 @@
 import logging
 import sys
 from odoo.tests import TransactionCase
-from odoo.tools import config
+from odoo.tools import config, mute_logger
 
 import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 from odoo import exceptions
 
@@ -15,6 +16,9 @@ from .. import initialize_sentry
 from sentry_sdk.client import Client
 from sentry_sdk.hub import Hub, _InitGuard
 
+
+class CustomLoggingIntegration(LoggingIntegration):
+    pass
 
 class InMemoryClient(Client):
     '''A :class:`sentry.Client` subclass which simply stores events in a list.
@@ -30,14 +34,17 @@ class InMemoryClient(Client):
     def is_enabled(self):
         return True
 
-    def send(self, **kwargs):
-        import pdb;pdb.set_trace()
-        self.events.append(kwargs)
+    def capture_event(self, event, *args, **kwargs):
+        self.events.append(event)
+
+    # def send(self, **kwargs):
+    #     import pdb;pdb.set_trace()
+    #     self.events.append(kwargs)
 
     def has_event(self, event_level, event_msg):
         for event in self.events:
             if (event.get('level') == event_level and
-                    event.get('message') == event_msg):
+                    event.get('logentry', {}).get('message') == event_msg):
                 return True
         return False
 
@@ -64,6 +71,9 @@ class TestClientSetup(TransactionCase):
         }
         self.client = initialize_sentry(
             config, client_meth=initialize_sentry_memory)._client
+        # self.client.integrations['logging'] = CustomLoggingIntegration()
+        # self.client.integrations['logging']._handler
+        # self.client.integrations['logging']._breadcrumb_handler
 
 
     def assertEventCaptured(self, client, event_level, event_msg):
@@ -72,16 +82,17 @@ class TestClientSetup(TransactionCase):
             msg='Event: "%s" was not captured' % event_msg
         )
 
-
     def test_initialize_sentry_sets_dsn(self):
         """Check if the sentry_dsn is taken from conf custom"""
         self.assertEqual(self.client.dsn, self.dsn)
 
     def test_capture_event(self):
         level, msg = logging.WARNING, 'Test event, can be ignored'
+        # import pdb;pdb.set_trace()
+        # with mute_logger(__name__):
         self.logger.log(level, msg)
-        import pdb;pdb.set_trace()
-        print(logger.handlers)
+        # print(logger.handlers)
+        level = "\x1b[1;33m\x1b[1;49mwarning\x1b[0m"
         self.assertEventCaptured(self.client, level, msg)
 
 
