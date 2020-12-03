@@ -63,7 +63,7 @@ def initialize_sentry_memory(*args, **kwargs):
 class TestClientSetup(TransactionCase):
     def setUp(self):
         super(TestClientSetup, self).setUp()
-        self.logger = logging.getLogger(__name__)
+        # self.logger = logging.getLogger(__name__)
         self.dsn = 'http://public:secret@example.com/1'
         config = {
             'sentry_enabled': True,
@@ -71,14 +71,20 @@ class TestClientSetup(TransactionCase):
         }
         self.client = initialize_sentry(
             config, client_meth=initialize_sentry_memory)._client
+        self.handler = self.client.integrations['logging']._handler
+        # import pdb;pdb.set_trace()
         # self.client.integrations['logging'] = CustomLoggingIntegration()
         # self.client.integrations['logging']._handler
         # self.client.integrations['logging']._breadcrumb_handler
 
+    def log(self, level, msg, exc_info=None):
+        record = logging.LogRecord(
+            __name__, level, __file__, 42, msg, (), exc_info)
+        self.handler.emit(record)
 
-    def assertEventCaptured(self, client, event_level, event_msg):
+    def assertEventCaptured(self, event_level, event_msg):
         self.assertTrue(
-            client.has_event(event_level, event_msg),
+            self.client.has_event(event_level, event_msg),
             msg='Event: "%s" was not captured' % event_msg
         )
 
@@ -88,12 +94,9 @@ class TestClientSetup(TransactionCase):
 
     def test_capture_event(self):
         level, msg = logging.WARNING, 'Test event, can be ignored'
-        # import pdb;pdb.set_trace()
-        # with mute_logger(__name__):
-        self.logger.log(level, msg)
-        # print(logger.handlers)
-        level = "\x1b[1;33m\x1b[1;49mwarning\x1b[0m"
-        self.assertEventCaptured(self.client, level, msg)
+        self.log(level, msg)
+        level = "warning"
+        self.assertEventCaptured(level, msg)
 
 
 # def log_handler_by_class(logger, handler_cls):
