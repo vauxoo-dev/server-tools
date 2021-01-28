@@ -20,7 +20,7 @@
 ##############################################################################
 
 import os
-import ConfigParser
+import configparser
 from lxml import etree
 from itertools import chain
 
@@ -91,7 +91,7 @@ def _load_config():
     else:
         conf_files = _listconf(running_env)
 
-    config_p = ConfigParser.SafeConfigParser()
+    config_p = configparser.SafeConfigParser()
     # options are case-sensitive
     config_p.optionxform = str
     try:
