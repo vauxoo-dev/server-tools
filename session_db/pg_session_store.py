@@ -158,8 +158,18 @@ class PGSessionStore(sessions.SessionStore):
         """Helper method that preserves keys while converting values.
         """
         if isinstance(data_node, dict):
-            return {self._traverse_and_convert(key, conversion_func): self._traverse_and_convert(
-                value, conversion_func) for key, value in data_node.items()}
+            res = {}
+            for key, value in data_node.items():
+                # This is necessary because Odoo's core (ir_qweb) needs the 'debug' value as a string.
+                # The value for this key can be: "1", "assets", "True", "False", etc.
+                # Ref: https://github.com/Vauxoo/odoo/blob/d4d64d613800b8dc44c3262e13a2a81dbf3c742c/odoo/addons/base/models/ir_qweb.py#L912
+                # A test on an Odoo instance without the 'session_db' module confirmed
+                # that 'request.session.debug' value is always a string (str) type.
+                if key != "debug":
+                    key = self._traverse_and_convert(key, conversion_func)
+                    value = self._traverse_and_convert(value, conversion_func)
+                res.update({key: value})
+            return res
         if isinstance(data_node, list):
             return [self._traverse_and_convert(item, conversion_func) for item in data_node]
         else:
