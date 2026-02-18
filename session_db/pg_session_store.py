@@ -159,17 +159,9 @@ class PGSessionStore(sessions.SessionStore):
         if isinstance(data_node, dict):
             res = {}
             for key, value in data_node.items():
-                # This is necessary because Odoo's core (ir_qweb) needs the 'debug' value as
-                # a string.
-                # The value for this key can be: "1", "assets", "True", "False", etc.
-                # Ref: https://github.com/Vauxoo/odoo/blob/d4d64d613800b8dc44c3262e13/
-                # odoo/addons/base/models/ir_qweb.py#L912
-                # A test on an Odoo instance without the 'session_db' module confirmed
-                # that 'request.session.debug' value is always a string (str) type.
-                if key != "debug":
-                    key = self._traverse_and_convert(key, conversion_func)
-                    value = self._traverse_and_convert(value, conversion_func)
-                res.update({key: value})
+                res.update({
+                    self._traverse_and_convert(key, conversion_func): self._traverse_and_convert(value, conversion_func)
+                })
             return res
         if isinstance(data_node, list):
             return [
@@ -190,34 +182,16 @@ class PGSessionStore(sessions.SessionStore):
 
     def str_to_session(self, data):
         """Converts binary str to binary value again.
-        Converts int/float str values convert to their respective types.
         """
 
         def convert(value):
-            if not isinstance(value, str):
+            if not isinstance(value, str) or not value.startswith(self.prefix_binary):
                 return value  # Only process strings
-            # 1. Check for binary
-            if value.startswith(self.prefix_binary):
-                base64_string = value[len(self.prefix_binary) :]
-                try:
-                    return base64.b64decode(base64_string)
-                except (ValueError, TypeError):
-                    return value
-            numeric_parsers = [
-                # 2. Check for float (positive or negative)
-                # This regex requires a decimal point.
-                (r"^-?\d+\.\d+$", float),
-                # 3. Check for integer (positive or negative)
-                # This regex matches only digits (with optional sign).
-                (r"^-?\d+$", int),
-            ]
-            for pattern, parser in numeric_parsers:
-                if re.match(pattern, value):
-                    try:
-                        return parser(value)
-                    except (ValueError, TypeError):
-                        return value
-            return value
+            base64_string = value[len(self.prefix_binary) :]
+            try:
+                return base64.b64decode(base64_string)
+            except (ValueError, TypeError):
+                return value
 
         return self._traverse_and_convert(data, convert)
 
