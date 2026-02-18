@@ -2,12 +2,12 @@
 # @author Nicolas Seinlet
 # Copyright (c) ACSONE SA 2022
 # @author Stéphane Bidoul
+import base64
 import json
 import logging
 import os
 import re
 
-import base64
 import psycopg2
 
 import odoo
@@ -155,14 +155,15 @@ class PGSessionStore(sessions.SessionStore):
         )
 
     def _traverse_and_convert(self, data_node, conversion_func):
-        """Helper method that preserves keys while converting values.
-        """
+        """Helper method that preserves keys while converting values."""
         if isinstance(data_node, dict):
             res = {}
             for key, value in data_node.items():
-                # This is necessary because Odoo's core (ir_qweb) needs the 'debug' value as a string.
+                # This is necessary because Odoo's core (ir_qweb) needs the 'debug' value as
+                # a string.
                 # The value for this key can be: "1", "assets", "True", "False", etc.
-                # Ref: https://github.com/Vauxoo/odoo/blob/d4d64d613800b8dc44c3262e13a2a81dbf3c742c/odoo/addons/base/models/ir_qweb.py#L912
+                # Ref: https://github.com/Vauxoo/odoo/blob/d4d64d613800b8dc44c3262e13/
+                # odoo/addons/base/models/ir_qweb.py#L912
                 # A test on an Odoo instance without the 'session_db' module confirmed
                 # that 'request.session.debug' value is always a string (str) type.
                 if key != "debug":
@@ -171,16 +172,17 @@ class PGSessionStore(sessions.SessionStore):
                 res.update({key: value})
             return res
         if isinstance(data_node, list):
-            return [self._traverse_and_convert(item, conversion_func) for item in data_node]
-        else:
-            return conversion_func(data_node)
+            return [
+                self._traverse_and_convert(item, conversion_func) for item in data_node
+            ]
+        return conversion_func(data_node)
 
     def session_to_str(self, data):
-        """Converts binary values to prefixed strings.
-        """
+        """Converts binary values to prefixed strings."""
+
         def convert(value):
             if isinstance(value, bytes):
-                base64_string = base64.b64encode(value).decode('utf-8')
+                base64_string = base64.b64encode(value).decode("utf-8")
                 return self.prefix_binary + base64_string
             return value
 
@@ -190,30 +192,31 @@ class PGSessionStore(sessions.SessionStore):
         """Converts binary str to binary value again.
         Converts int/float str values convert to their respective types.
         """
+
         def convert(value):
             if not isinstance(value, str):
                 return value  # Only process strings
             # 1. Check for binary
             if value.startswith(self.prefix_binary):
-                base64_string = value[len(self.prefix_binary):]
+                base64_string = value[len(self.prefix_binary) :]
                 try:
                     return base64.b64decode(base64_string)
                 except (ValueError, TypeError):
                     return value
-            # 2. Check for float (positive or negative)
-            # This regex requires a decimal point.
-            if re.match(r'^-?\d+\.\d+$', value):
-                try:
-                    return float(value)
-                except (ValueError, TypeError):
-                    return value
-            # 3. Check for integer (positive or negative)
-            # This regex matches only digits (with optional sign).
-            if re.match(r'^-?\d+$', value):
-                try:
-                    return int(value)
-                except (ValueError, TypeError):
-                    return value
+            numeric_parsers = [
+                # 2. Check for float (positive or negative)
+                # This regex requires a decimal point.
+                (r"^-?\d+\.\d+$", float),
+                # 3. Check for integer (positive or negative)
+                # This regex matches only digits (with optional sign).
+                (r"^-?\d+$", int),
+            ]
+            for pattern, parser in numeric_parsers:
+                if re.match(pattern, value):
+                    try:
+                        return parser(value)
+                    except (ValueError, TypeError):
+                        return value
             return value
 
         return self._traverse_and_convert(data, convert)
