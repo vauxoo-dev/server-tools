@@ -3,6 +3,7 @@
 # Copyright (c) ACSONE SA 2022
 # @author Stéphane Bidoul
 import base64
+import binascii
 import json
 import logging
 import os
@@ -183,8 +184,8 @@ class PGSessionStore(sessions.SessionStore):
         def convert(value):
             if isinstance(value, str) and value.startswith(self.prefix_binary):
                 try:
-                    return base64.b64decode(value[len(self.prefix_binary) :])
-                except (ValueError, TypeError):
+                    return base64.b64decode(value[len(self.prefix_binary):], validate=True)
+                except (ValueError, TypeError, binascii.Error):
                     return value
             return value
 
