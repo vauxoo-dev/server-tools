@@ -6,7 +6,6 @@ import base64
 import json
 import logging
 import os
-import re
 
 import psycopg2
 
@@ -155,43 +154,39 @@ class PGSessionStore(sessions.SessionStore):
         )
 
     def _traverse_and_convert(self, data_node, conversion_func):
-        """Helper method that preserves keys while converting values."""
+        """
+        Recursively applies a conversion function to all elements in dicts and lists.
+        """
         if isinstance(data_node, dict):
-            res = {}
-            for key, value in data_node.items():
-                res.update({
-                    self._traverse_and_convert(key, conversion_func): self._traverse_and_convert(value, conversion_func)
-                })
-            return res
+            return {
+                self._traverse_and_convert(
+                    key, conversion_func
+                ): self._traverse_and_convert(value, conversion_func)
+                for key, value in data_node.items()
+            }
         if isinstance(data_node, list):
             return [
                 self._traverse_and_convert(item, conversion_func) for item in data_node
             ]
+
         return conversion_func(data_node)
 
     def session_to_str(self, data):
-        """Converts binary values to prefixed strings."""
-
         def convert(value):
             if isinstance(value, bytes):
-                base64_string = base64.b64encode(value).decode("utf-8")
-                return self.prefix_binary + base64_string
+                return self.prefix_binary + base64.b64encode(value).decode("utf-8")
             return value
 
         return self._traverse_and_convert(data, convert)
 
     def str_to_session(self, data):
-        """Converts binary str to binary value again.
-        """
-
         def convert(value):
-            if not isinstance(value, str) or not value.startswith(self.prefix_binary):
-                return value  # Only process strings
-            base64_string = value[len(self.prefix_binary) :]
-            try:
-                return base64.b64decode(base64_string)
-            except (ValueError, TypeError):
-                return value
+            if isinstance(value, str) and value.startswith(self.prefix_binary):
+                try:
+                    return base64.b64decode(value[len(self.prefix_binary) :])
+                except (ValueError, TypeError):
+                    return value
+            return value
 
         return self._traverse_and_convert(data, convert)
 
